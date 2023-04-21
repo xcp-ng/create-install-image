@@ -140,6 +140,7 @@ setup_yum_download() {
     YUMDLFLAGS=(
         # non-$VERBOSE is -q, $VERBOSE is default, yum's -v would be debug
         $([ -n "$VERBOSE" ] || printf -- "-q")
+        #--rpmverbosity=debug
         --config="$YUMDLCONF"
         --releasever="$DIST"
     )
