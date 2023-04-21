@@ -151,6 +151,11 @@ sed "s/#.*//" < "$PACKAGES_LST" |
 "${FAKEROOT[@]}" "${FAKECHROOT[@]}" rpm --root="$ROOTFS" --nodeps --erase \
     binutils dracut pkgconfig xen-hypervisor
 
+### static-linked ldconfig run by postinst did not update its cache
+# FIXME do we really need it?
+"${FAKEROOT[@]}" "${FAKECHROOT[@]}" "$ROOTFS"/sbin/ldconfig -C "$ROOTFS"/etc/ld.so.cache
+
+
 ### removal of misc stuff
 
 ### deal with buggy yum/rpm
