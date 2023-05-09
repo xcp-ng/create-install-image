@@ -17,16 +17,10 @@ HOME="$CLEANDIR"
 set|grep "trash dir"
 
 test_expect_success EXPENSIVE "build install.img for 8.3:base" "
-    set -x &&
-    sudo sh -c '
-        set -x &&
-        cd $SHARNESS_TRASH_DIRECTORY &&
-
-        $TOPDIR/scripts/create-installimg.sh \
-            --srcurl $XCPTEST_REPOROOT/8.3 \
-            --output install-8.3-x86_64.img \
-            8.3:base
-    ' &&
+    $TOPDIR/scripts/create-installimg.sh \
+        --srcurl $XCPTEST_REPOROOT/8.3 \
+        --output install-8.3-x86_64.img \
+        8.3:base &&
 
     test -r install-8.3-x86_64.img
 "

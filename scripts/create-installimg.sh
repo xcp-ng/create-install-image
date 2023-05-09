@@ -7,6 +7,8 @@ topdir=$mydir/..
 
 . "$mydir/lib/misc.sh"
 
+[ "$(id -u)" != 0 ] || die "should not run as root"
+
 usage() {
     cat <<EOF
 Usage: $0 [<options>] <base-config>[:<config-overlay>]*
@@ -87,7 +89,8 @@ fi
 [ ! -d "$OUTPUT_IMG" ] || die "'$OUTPUT_IMG' exists and is a directory"
 
 command -v yum >/dev/null || die "required tool not found: yum"
-#command -v fakeroot >/dev/null || die "required tool not found: fakeroot"
+command -v fakeroot >/dev/null || die "required tool not found: fakeroot"
+command -v fakechroot >/dev/null || die "required tool not found: fakechroot"
 
 
 #### create base rootfs
@@ -112,20 +115,59 @@ YUMFLAGS=(
 
 setup_yum_repos "${YUMFLAGS[@]}"
 
+### yum/rpm --installroot is buggy under fake(ch)root, add clutches
+# wrongly-expected nested directories
+for confused_dir in "$ROOTFS" "$TMPDIR"; do
+    mkdir -p "$(dirname "$ROOTFS/$confused_dir")"
+    ln -sr "$confused_dir" "$ROOTFS/$confused_dir"
+done
+# full copy of repo so file:// URLs will resolve *inside* the chroot
+case "$SRCURL" in
+    file://*) localrepo="${SRCURL#file://}"
+              mkdir -p "$(dirname "$ROOTFS/$localrepo")"
+              cp -al "$localrepo" "$ROOTFS/$localrepo"
+              ;;
+    *)        localrepo=
+              ;;
+esac
+
+FAKEROOTSTATE=$(mktemp "$TMPDIR/fakeroot-XXXXXX")
+FAKEROOT=(fakeroot -i "$FAKEROOTSTATE" -s "$FAKEROOTSTATE")
+FAKECHROOT=(fakechroot --config-dir "$PWD/configs/_fakechroot")
+
 PACKAGES_LST=$(find_config packages.lst)
 sed "s/#.*//" < "$PACKAGES_LST" |
-    xargs yum "${YUMFLAGS[@]}" install \
+    xargs \
+        "${FAKEROOT[@]}" "${FAKECHROOT[@]}" \
+        yum "${YUMFLAGS[@]}" install \
         --assumeyes \
         --noplugins
 
 ### removal of abusively-pulled packages (list manually extracted as
 ### packages not in 8.2.1 install.img)
 
-rpm --root="$ROOTFS" --nodeps --erase \
+"${FAKEROOT[@]}" "${FAKECHROOT[@]}" rpm --root="$ROOTFS" --nodeps --erase \
     binutils dracut gpg-pubkey pkgconfig xen-hypervisor
 
-
 ### removal of misc stuff
+
+### deal with buggy yum/rpm
+# remove clutches we added above
+for confused_dir in "$ROOTFS" "$TMPDIR"; do
+    rm "$ROOTFS/$confused_dir" && rmdir -p "$(dirname "$ROOTFS/$confused_dir")" || true
+done
+[ -z "$localrepo" ] ||
+    rm -rf "$ROOTFS/$localrepo" && rmdir -p "$(dirname "$ROOTFS/$localrepo")" || true
+# symlinks were created wrong
+find "$ROOTFS" -type l -print | while read f; do
+    case "$(readlink $f)" in
+        "$ROOTFS"*)
+            target="$(readlink $f | sed "s#$ROOTFS##g")"
+            rm $f
+            ln -s $target $f
+            ;;
+    esac
+done
 
 # > 100KB
 BINS="systemd-analyze systemd-nspawn journalctl machinectl dgawk loginctl ssh-keyscan pgawk busctl systemd-run"
@@ -158,10 +200,10 @@ find $ROOTFS/usr -name "*.py[co]" -delete
 ### extra stuff
 
 # /init for initrd
-ln -sf /sbin/init $ROOTFS/init
+"${FAKEROOT[@]}" ln -sf /sbin/init $ROOTFS/init
 
 # files specific to the install image
-(cd "$topdir/templates/installimg/$DIST" && find . | cpio -o) | (cd $ROOTFS && cpio -idm --owner=root:root ${VERBOSE})
+(cd "$topdir/templates/installimg/$DIST" && find . | cpio -o) | (cd $ROOTFS && "${FAKEROOT[@]}" cpio -idm --owner=root:root ${VERBOSE})
 
 # generate depmod cache, as 8.2 template adds support for "override"
 for version in $(cd "$ROOTFS/lib/modules" && ls); do
@@ -172,8 +214,8 @@ done
 : > $ROOTFS/etc/yum/yum.conf
 
 # installer branding - FIXME should be part of host-installer.rpm
-ln -s ../../../EULA "$ROOTFS/opt/xensource/installer/"
-ln -s ../../../usr/lib/python2.7/site-packages/xcp/branding.py \
+"${FAKEROOT[@]}" ln -s ../../../EULA "$ROOTFS/opt/xensource/installer/"
+"${FAKEROOT[@]}" ln -s ../../../usr/lib/python2.7/site-packages/xcp/branding.py \
            "$ROOTFS/opt/xensource/installer/version.py"
 
 
@@ -188,22 +230,24 @@ case "$DIST" in
         ;;
 esac
 
-systemctl --root=$ROOTFS enable installer "$INSTALLERGETTY"
+"${FAKEROOT[@]}" systemctl --root=$ROOTFS enable installer "$INSTALLERGETTY"
 
-systemctl --root=$ROOTFS disable \
+"${FAKEROOT[@]}" systemctl --root=$ROOTFS disable \
            getty@tty1 fcoe lldpad xen-init-dom0 xenconsoled xenstored chronyd chrony-wait
 
 ### final cleanups
 rm -rf $ROOTFS/var/lib/yum/{yumdb,history} $ROOTFS/var/cache/yum
 
 ### repack cache into .img
+# make sure a file owned by root (from previous versions) does not cause a failure
+rm -f $OUTPUT_IMG
 # make sure bzip2 doesn't leave an invalid output if its input command fails
 trap "rm -f $OUTPUT_IMG" ERR
 # FIXME replace bzip with better algo
 (
     set -o pipefail
     cd "$ROOTFS"
-    find . | cpio -o -H newc
+    find . | "${FAKEROOT[@]}" cpio -o -H newc
 ) | bzip2 > "$OUTPUT_IMG"
 
 # Local Variables:

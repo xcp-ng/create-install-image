@@ -21,8 +21,9 @@ XCP-ng versions.
 They require to install some additional packages first:
 
 ```
-sudo yum install -y genisoimage syslinux grub-tools createrepo_c libfaketime
-sudo yum install -y --enablerepo=epel gnupg1
+sudo yum install -y genisoimage syslinux grub-tools createrepo_c \
+                    libfaketime fakeroot
+sudo yum install -y --enablerepo=epel gnupg1 fakechroot
 ```
 
 
@@ -104,7 +105,7 @@ the layer search path (one is provided in `base`).
 ```
 ./scripts/mirror-repos.sh 8.3 ~/mirrors/xcpng
 
-sudo ./scripts/create-installimg.sh \
+./scripts/create-installimg.sh \
     --srcurl file://$HOME/mirrors/xcpng/8.3 \
     --output install-8.3.testing.img \
     8.3:testing
@@ -121,7 +122,7 @@ sudo ./scripts/create-installimg.sh \
 ```
 ./scripts/mirror-repos.sh 8.2 ~/mirrors/xcpng
 
-sudo ./scripts/create-installimg.sh \
+./scripts/create-installimg.sh \
     --srcurl file://$HOME/mirrors/xcpng/8.2 \
     --output install-8.2.updates.img \
     8.2:updates
