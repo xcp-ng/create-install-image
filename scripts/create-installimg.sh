@@ -136,18 +136,20 @@ FAKEROOT=(fakeroot -i "$FAKEROOTSTATE" -s "$FAKEROOTSTATE")
 FAKECHROOT=(fakechroot --config-dir "$PWD/configs/_fakechroot")
 
 PACKAGES_LST=$(find_config packages.lst)
+PACKAGES_DIR="$ROOTFS/RPMS"
 sed "s/#.*//" < "$PACKAGES_LST" |
     xargs \
-        "${FAKEROOT[@]}" "${FAKECHROOT[@]}" \
-        yum "${YUMFLAGS[@]}" install \
-        --assumeyes \
-        --noplugins
+        yumdownloader "${YUMFLAGS[@]}" \
+            --destdir="$PACKAGES_DIR" \
+            --assumeyes --resolve --noplugins
+"${FAKEROOT[@]}" "${FAKECHROOT[@]}" \
+    rpm --root="$ROOTFS" --install "$PACKAGES_DIR"/*.rpm
 
 ### removal of abusively-pulled packages (list manually extracted as
 ### packages not in 8.2.1 install.img)
 
 "${FAKEROOT[@]}" "${FAKECHROOT[@]}" rpm --root="$ROOTFS" --nodeps --erase \
-    binutils dracut gpg-pubkey pkgconfig xen-hypervisor
+    binutils dracut pkgconfig xen-hypervisor
 
 ### removal of misc stuff
 
