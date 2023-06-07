@@ -133,7 +133,7 @@ esac
 
 FAKEROOTSTATE=$(mktemp "$TMPDIR/fakeroot-XXXXXX")
 FAKEROOT=(fakeroot -i "$FAKEROOTSTATE" -s "$FAKEROOTSTATE")
-FAKECHROOT=(fakechroot --config-dir "$PWD/configs/_fakechroot")
+FAKECHROOT=(fakechroot) # --config-dir "$PWD/configs/_fakechroot")
 
 PACKAGES_LST=$(find_config packages.lst)
 PACKAGES_DIR="$ROOTFS/RPMS"
