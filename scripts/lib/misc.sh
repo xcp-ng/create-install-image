@@ -101,7 +101,7 @@ trap 'exitcleanup' EXIT INT
 # versions should be available.  Yeah that sucks hard.
 # See https://unix.stackexchange.com/questions/92257/
 export TMPDIR=$(mktemp -d "$PWD/tmpdir-XXXXXX")
-CLEANUP_DIRS+=("$TMPDIR")
+#CLEANUP_DIRS+=("$TMPDIR")
 
 
 # infrastructure for fetching RPMs from source repo

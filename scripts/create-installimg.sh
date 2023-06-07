@@ -254,7 +254,7 @@ trap "rm -f $OUTPUT_IMG" ERR
 (
     set -o pipefail
     cd "$ROOTFS"
-    find . | "${FAKEROOT[@]}" cpio -o -H newc
+    find . | strace -o $TMPDIR/trace.out -f -s1024 "${FAKEROOT[@]}" cpio -o -H newc
 ) | bzip2 > "$OUTPUT_IMG"
 
 # Local Variables:
