@@ -1,14 +1,32 @@
-# Generation of installation ISO
+# Generation of XCP-ng installation images
 
-## individual scripts
+The scripts in this repository can be used to generate installation
+images for XCP-ng.  The resulting `.iso` images can be burnt on a
+CD/DVD or on a USB-storage device.
+
+Two kind of images are currently supported:
+* full image, including all necessary packages, allowing installation
+  without network access
+* "netinstall" image, much smaller, which will only allow packages to
+  be fetched from a repository through the network
+
+## General notes
 
 Those scripts should be run in the xcp-ng-build-env docker container
-for reproducibility.  They require some additional packages:
+for reproducibility.  Since the base environment is currently based on
+CentOS 7, many constraints prevent to make it work properly on more
+recent Linux distros.  This base distro is expected to evolve with new
+XCP-ng versions.
+
+They require to install some additional packages first:
 
 ```
 sudo yum install -y genisoimage syslinux grub-tools createrepo_c
 sudo yum install -y --enablerepo=epel gnupg1
 ```
+
+
+## individual scripts
 
 All script have a `--help` documenting all their options.
 
@@ -36,7 +54,7 @@ This scripts excludes from the mirror:
 - development RPMs
 - debugging-symbols RPMs
 
-### configuration layers and package repositories
+## configuration layers and package repositories
 
 Configuration layers are defined as a subdirectory of the `configs/`
 directory.  Commands are given a layer search path as
@@ -117,7 +135,7 @@ qemu-system-x86_64 -serial stdio -m 1G -cdrom xcp-ng-8.3-install.iso \
   --bios /usr/share/edk2/ovmf/OVMF_CODE.fd -net none
 ```
 
-### testing that scripts run correctly
+## testing that scripts run correctly
 
 Minimal tests to generate install ISO for a few important
 configurations are available in `tests/`.  They require one-time
