@@ -23,7 +23,7 @@ Options:
     --netinstall              do not include repository in ISO
     --sign <NICK> <KEYID>     sign repomd with default gpg key <KEYID>, with readable <NICK>
     --force-overwrite         don't abort if output file already exists
-    --verbose		      be talkative
+    --verbose                 be talkative
 EOF
 }
 
@@ -194,21 +194,21 @@ if [ $DOREPO = 1 ]; then
     createrepo_c ${VERBOSE} "$ISODIR"
     if [ -n "$KEYID" ]; then
         gpg1 ${VERBOSE} --default-key="$KEYID" --armor --detach-sign "$ISODIR/repodata/repomd.xml"
-	gpg1 ${VERBOSE} --armor -o "$ISODIR/RPM-GPG-KEY-$KEYNICK" --export "$KEYID"
-	[ -z "$VERBOSE" ] || echo "using key RPM-GPG-KEY-$KEYNICK in .treeinfo"
-	sed -i "s,key1 = .*,key1 = RPM-GPG-KEY-$KEYNICK," \
-	    $ISODIR/.treeinfo
+        gpg1 ${VERBOSE} --armor -o "$ISODIR/RPM-GPG-KEY-$KEYNICK" --export "$KEYID"
+        [ -z "$VERBOSE" ] || echo "using key RPM-GPG-KEY-$KEYNICK in .treeinfo"
+        sed -i "s,key1 = .*,key1 = RPM-GPG-KEY-$KEYNICK," \
+            $ISODIR/.treeinfo
     else
-	# installer checks if keys are here even when verification is disabled
-	[ -z "$VERBOSE" ] || echo "disabling keys in .treeinfo"
-	sed -i "s,^key,#key," \
-	    $ISODIR/.treeinfo
+        # installer checks if keys are here even when verification is disabled
+        [ -z "$VERBOSE" ] || echo "disabling keys in .treeinfo"
+        sed -i "s,^key,#key," \
+            $ISODIR/.treeinfo
 
-	# don't try to validate repo sig if we put none
-	[ -z "$VERBOSE" ] || echo "adding no-repo-gpgcheck to boot/isolinux/isolinux.cfg boot/grub/grub*.cfg"
-	sed -i "s,/vmlinuz,/vmlinuz no-repo-gpgcheck," \
-	    $ISODIR/boot/isolinux/isolinux.cfg \
-	    $ISODIR/boot/grub/grub*.cfg
+        # don't try to validate repo sig if we put none
+        [ -z "$VERBOSE" ] || echo "adding no-repo-gpgcheck to boot/isolinux/isolinux.cfg boot/grub/grub*.cfg"
+        sed -i "s,/vmlinuz,/vmlinuz no-repo-gpgcheck," \
+            $ISODIR/boot/isolinux/isolinux.cfg \
+            $ISODIR/boot/grub/grub*.cfg
     fi
 else
     # no repo
@@ -247,17 +247,17 @@ if false; then
     # grub2-mkrescue (centos) vs. grub-mkrescue (debian, RoW?)
     #strace -f -o /tmp/log -s 4096
     "$MKRESCUE" \
-	--locales= \
-	--modules= \
-	--product-name="XCP-ng" --product-version="$DIST" \
-	\
-	-v \
-	-follow-links \
-	-r -J --joliet-long -V "$VOLID" -input-charset utf-8 \
-	-c boot/isolinux/boot.cat -b boot/isolinux/isolinux.bin \
-	-no-emul-boot -boot-load-size 4 -boot-info-table \
-    \
-	-o "$OUTISO" $ISODIR
+        --locales= \
+        --modules= \
+        --product-name="XCP-ng" --product-version="$DIST" \
+        \
+        -v \
+        -follow-links \
+        -r -J --joliet-long -V "$VOLID" -input-charset utf-8 \
+        -c boot/isolinux/boot.cat -b boot/isolinux/isolinux.bin \
+        -no-emul-boot -boot-load-size 4 -boot-info-table \
+        \
+        -o "$OUTISO" $ISODIR
 
 else
     # UEFI bootloader
@@ -270,10 +270,10 @@ else
     rpm2cpio $SCRATCHDIR/grub-efi-*.rpm | (cd "$SCRATCHDIR/grub" && cpio ${VERBOSE} -idm)
 
     "$MKIMAGE" --directory "$SCRATCHDIR/grub/usr/lib/grub/x86_64-efi" --prefix '()/boot/grub' \
-	       $VERBOSE \
-	       --output "$BOOTX64" \
-	       --format 'x86_64-efi' --compression 'auto' \
-	       'part_gpt' 'part_msdos' 'part_apple' 'iso9660'
+               $VERBOSE \
+               --output "$BOOTX64" \
+               --format 'x86_64-efi' --compression 'auto' \
+               'part_gpt' 'part_msdos' 'part_apple' 'iso9660'
     "${FAKETIME[@]}" mformat -i "$ISODIR/boot/efiboot.img" -N 0 -C -f 2880 -L 16 ::.
     "${FAKETIME[@]}" mmd     -i "$ISODIR/boot/efiboot.img" ::/efi ::/efi/boot
     "${FAKETIME[@]}" mcopy   -i "$ISODIR/boot/efiboot.img" "$BOOTX64" ::/efi/boot/bootx64.efi
@@ -284,12 +284,16 @@ else
 
     genisoimage \
         -o "$OUTISO" \
-	${VERBOSE:- -quiet} \
+        ${VERBOSE:- -quiet} \
         -r -J --joliet-long -V "$VOLID" -input-charset utf-8 \
         -c boot/isolinux/boot.cat -b boot/isolinux/isolinux.bin \
         -no-emul-boot -boot-load-size 4 -boot-info-table \
         -no-emul-boot \
-	-eltorito-alt-boot --efi-boot boot/efiboot.img \
+        -eltorito-alt-boot --efi-boot boot/efiboot.img \
         $ISODIR
     isohybrid ${VERBOSE} --uefi "$OUTISO"
 fi
+
+# Local Variables:
+# indent-tabs-mode: nil
+# End:

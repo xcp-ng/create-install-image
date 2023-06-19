@@ -17,7 +17,7 @@ Options:
                               add yum repo with name <NICK> and base URL <URL>
     --output|-o <OUTPUT.IMG>  choose a different output name
     --force-overwrite         don't abort if output file already exists
-    -v|--verbose	      be talkative
+    -v|--verbose              be talkative
 EOF
 }
 
@@ -143,8 +143,8 @@ BINS="systemd-analyze systemd-nspawn journalctl machinectl dgawk loginctl ssh-ke
 BINS+=" ssh-agent timedatectl systemd-cgls localectl hostnamectl systemd-inhibit info oldfind coredumpctl"
 SBINS="pdata_tools oxenstored ldconfig build-locale-archive glibc_post_upgrade.x86_64 sln install-info"
 MOREFILES=" \
-	/boot \
-	/usr/share/locale /usr/lib/locale /usr/share/i18n/locales \
+        /boot \
+        /usr/share/locale /usr/lib/locale /usr/share/i18n/locales \
         /usr/libexec/xen/boot \
         /usr/share/bash-completion \
 "
@@ -185,24 +185,24 @@ done
 # installer branding - FIXME should be part of host-installer.rpm
 ln -s ../../../EULA "$ROOTFS/opt/xensource/installer/"
 ln -s ../../../usr/lib/python2.7/site-packages/xcp/branding.py \
-	   "$ROOTFS/opt/xensource/installer/version.py"
+           "$ROOTFS/opt/xensource/installer/version.py"
 
 
 ### services
 
 case "$DIST" in
     8.2)
-	INSTALLERGETTY=getty@tty2.service
-	;;
+        INSTALLERGETTY=getty@tty2.service
+        ;;
     *)
-	INSTALLERGETTY=installer-getty@tty2.service
-	;;
+        INSTALLERGETTY=installer-getty@tty2.service
+        ;;
 esac
 
 systemctl --root=$ROOTFS enable installer "$INSTALLERGETTY"
 
 systemctl --root=$ROOTFS disable \
-	   getty@tty1 fcoe lldpad xen-init-dom0 xenconsoled xenstored chronyd chrony-wait
+           getty@tty1 fcoe lldpad xen-init-dom0 xenconsoled xenstored chronyd chrony-wait
 
 ### final cleanups
 rm -rf $ROOTFS/var/lib/yum/{yumdb,history} $ROOTFS/var/cache/yum
@@ -216,3 +216,7 @@ trap "rm -f $OUTPUT_IMG" ERR
     cd "$ROOTFS"
     find . | cpio -o -H newc
 ) | bzip2 > "$OUTPUT_IMG"
+
+# Local Variables:
+# indent-tabs-mode: nil
+# End:
