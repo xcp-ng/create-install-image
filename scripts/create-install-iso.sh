@@ -288,8 +288,10 @@ else
         -r -J --joliet-long -V "$VOLID" -input-charset utf-8 \
         -c boot/isolinux/boot.cat -b boot/isolinux/isolinux.bin \
         -no-emul-boot -boot-load-size 4 -boot-info-table \
-        -no-emul-boot \
+        \
         -eltorito-alt-boot --efi-boot boot/efiboot.img \
+        -no-emul-boot \
+        \
         $ISODIR
     isohybrid ${VERBOSE} --uefi "$OUTISO"
 fi
