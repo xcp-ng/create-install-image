@@ -122,18 +122,40 @@ sudo ./scripts/create-installimg.sh \
 
 ### testing boot modes in qemu
 
-PC BIOS:
+Base command will use PC BIOS:
 
 ```
-qemu-system-x86_64 -serial stdio -m 1G -cdrom xcp-ng-8.3-install.iso
+qemu-system-x86_64 -serial stdio -m 2G
 ```
 
-UEFI:
+Note that `-m 1G` is enough to check that the bootloader is properly
+loaded and runs, but not to boot to the installer TUI.
+
+For UEFI find the OVMF firmware (on Debian: in `/usr/share/OVMF/`),
+and add:
 
 ```
-qemu-system-x86_64 -serial stdio -m 1G -cdrom xcp-ng-8.3-install.iso \
-  --bios /usr/share/edk2/ovmf/OVMF_CODE.fd -net none
+ --bios /usr/share/edk2/ovmf/OVMF_CODE.fd
 ```
+
+(`-net none` was found to be sometimes necessary in UEFI mode, for a
+reason still to be determined)
+
+* boot media selection:
+
+  * CD/DVD:
+  
+  ```
+   -cdrom xcp-ng-install.iso
+  ```
+  
+  * USB storage:
+  
+  ```
+   -drive if=none,id=stick,format=raw,file=xcp-ng-install.iso \
+   -device nec-usb-xhci,id=xhci \
+   -device usb-storage,bus=xhci.0,drive=stick
+  ```
 
 ## testing that scripts run correctly
 
