@@ -314,6 +314,15 @@ else
     "${FAKETIME[@]}" mmd     -i "$ISODIR/boot/efiboot.img" ::/EFI ::/EFI/BOOT
     "${FAKETIME[@]}" mcopy   -i "$ISODIR/boot/efiboot.img" "$BOOTX64" ::/EFI/BOOT/BOOTX64.EFI
 
+    # Seems some BIOSes set this image as root instead of the ISO,
+    # need a (slightly modified) grub.cfg to embed inside
+    GRUBEFIBOOTCFGPATCH=$(find_config grub-efiboot-cfg.patch)
+    cp "$ISODIR/EFI/xenserver/grub.cfg" "$TMPDIR/grub-efiboot.cfg"
+    patch $([ -n "$VERBOSE" ] || printf -- "--quiet") "$TMPDIR/grub-efiboot.cfg" "$GRUBEFIBOOTCFGPATCH"
+    "${FAKETIME[@]}" mmd     -i "$ISODIR/boot/efiboot.img" ::/EFI/xenserver
+    "${FAKETIME[@]}" mcopy   -i "$ISODIR/boot/efiboot.img" "$TMPDIR/grub-efiboot.cfg" ::/EFI/xenserver/grub.cfg
+
+
     genisoimage \
         -o "$OUTISO" \
         ${VERBOSE:- -quiet} \
