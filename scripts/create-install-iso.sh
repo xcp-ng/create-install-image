@@ -254,6 +254,15 @@ cp ${VERBOSE} -p \
    \
    $ISODIR/boot/isolinux/
 
+# files to copy for LegacyBIOS PXE support
+# FIXME: location for backward compatibility with XS and XCP-ng-8.2
+mkdir "$ISODIR/boot/pxelinux"
+cp ${VERBOSE} -p \
+   "$SCRATCHDIR/syslinux/usr/share/syslinux/pxelinux.0" \
+   "$SCRATCHDIR/syslinux/usr/share/syslinux/mboot.c32" \
+   "$SCRATCHDIR/syslinux/usr/share/syslinux/menu.c32" \
+   \
+   "$ISODIR/boot/pxelinux/"
 
 ## create final ISO
 
@@ -322,6 +331,10 @@ else
     "${FAKETIME[@]}" mmd     -i "$ISODIR/boot/efiboot.img" ::/EFI/xenserver
     "${FAKETIME[@]}" mcopy   -i "$ISODIR/boot/efiboot.img" "$TMPDIR/grub-efiboot.cfg" ::/EFI/xenserver/grub.cfg
 
+
+    # files to copy for UEFI PXE support
+    # FIXME: location for backward compatibility with XS and XCP-ng-8.2
+    cp -p "$BOOTX64" "$ISODIR/EFI/xenserver/"
 
     genisoimage \
         -o "$OUTISO" \
