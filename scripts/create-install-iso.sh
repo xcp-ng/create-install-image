@@ -266,25 +266,27 @@ if false; then
         -o "$OUTISO" $ISODIR
 
 else
-    BOOTX64=$(mktemp "$TMPDIR/bootx64-XXXXXX.efi")
-
     # unpack grub-efi.rpm
     get_rpms "$SCRATCHDIR" grub-efi
     mkdir "$SCRATCHDIR/grub"
     rpm2cpio $SCRATCHDIR/grub-efi-*.rpm | (cd "$SCRATCHDIR/grub" && cpio ${VERBOSE} -idm)
+
+    BOOTX64=$(mktemp "$TMPDIR/bootx64-XXXXXX.efi")
 
     "$MKIMAGE" --directory "$SCRATCHDIR/grub/usr/lib/grub/x86_64-efi" --prefix '()/EFI/xenserver' \
                $VERBOSE \
                --output "$BOOTX64" \
                --format 'x86_64-efi' --compression 'auto' \
                'part_gpt' 'part_msdos' 'part_apple' 'iso9660'
-    "${FAKETIME[@]}" mformat -i "$ISODIR/boot/efiboot.img" -N 0 -C -f 2880 -L 16 ::.
-    "${FAKETIME[@]}" mmd     -i "$ISODIR/boot/efiboot.img" ::/EFI ::/EFI/BOOT
-    "${FAKETIME[@]}" mcopy   -i "$ISODIR/boot/efiboot.img" "$BOOTX64" ::/EFI/BOOT/BOOTX64.EFI
 
     # grub modules
     # FIXME: too many modules?
-    tar -C "$SCRATCHDIR/grub/usr/lib" -cf - grub/x86_64-efi | tar -C "$ISODIR/boot" -xf - ${VERBOSE}
+    tar -C "$SCRATCHDIR/grub/usr/lib" -cf - grub/x86_64-efi |
+        tar -C "$ISODIR/boot" -xf - ${VERBOSE}
+
+    "${FAKETIME[@]}" mformat -i "$ISODIR/boot/efiboot.img" -N 0 -C -f 2880 -L 16 ::.
+    "${FAKETIME[@]}" mmd     -i "$ISODIR/boot/efiboot.img" ::/EFI ::/EFI/BOOT
+    "${FAKETIME[@]}" mcopy   -i "$ISODIR/boot/efiboot.img" "$BOOTX64" ::/EFI/BOOT/BOOTX64.EFI
 
     genisoimage \
         -o "$OUTISO" \
