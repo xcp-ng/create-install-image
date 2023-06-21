@@ -279,8 +279,8 @@ else
                --format 'x86_64-efi' --compression 'auto' \
                'part_gpt' 'part_msdos' 'part_apple' 'iso9660'
     "${FAKETIME[@]}" mformat -i "$ISODIR/boot/efiboot.img" -N 0 -C -f 2880 -L 16 ::.
-    "${FAKETIME[@]}" mmd     -i "$ISODIR/boot/efiboot.img" ::/efi ::/efi/boot
-    "${FAKETIME[@]}" mcopy   -i "$ISODIR/boot/efiboot.img" "$BOOTX64" ::/efi/boot/bootx64.efi
+    "${FAKETIME[@]}" mmd     -i "$ISODIR/boot/efiboot.img" ::/EFI ::/EFI/BOOT
+    "${FAKETIME[@]}" mcopy   -i "$ISODIR/boot/efiboot.img" "$BOOTX64" ::/EFI/BOOT/BOOTX64.EFI
 
     # grub modules
     # FIXME: too many modules?
