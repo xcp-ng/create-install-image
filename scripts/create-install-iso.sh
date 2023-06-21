@@ -205,10 +205,10 @@ if [ $DOREPO = 1 ]; then
             $ISODIR/.treeinfo
 
         # don't try to validate repo sig if we put none
-        [ -z "$VERBOSE" ] || echo "adding no-repo-gpgcheck to boot/isolinux/isolinux.cfg boot/grub/grub*.cfg"
+        [ -z "$VERBOSE" ] || echo "adding no-repo-gpgcheck to boot/isolinux/isolinux.cfg EFI/xenserver/grub*.cfg"
         sed -i "s,/vmlinuz,/vmlinuz no-repo-gpgcheck," \
             $ISODIR/boot/isolinux/isolinux.cfg \
-            $ISODIR/boot/grub/grub*.cfg
+            $ISODIR/EFI/xenserver/grub*.cfg
     fi
 else
     # no repo
@@ -273,7 +273,7 @@ else
     mkdir "$SCRATCHDIR/grub"
     rpm2cpio $SCRATCHDIR/grub-efi-*.rpm | (cd "$SCRATCHDIR/grub" && cpio ${VERBOSE} -idm)
 
-    "$MKIMAGE" --directory "$SCRATCHDIR/grub/usr/lib/grub/x86_64-efi" --prefix '()/boot/grub' \
+    "$MKIMAGE" --directory "$SCRATCHDIR/grub/usr/lib/grub/x86_64-efi" --prefix '()/EFI/xenserver' \
                $VERBOSE \
                --output "$BOOTX64" \
                --format 'x86_64-efi' --compression 'auto' \
