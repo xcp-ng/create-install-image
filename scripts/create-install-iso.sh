@@ -192,6 +192,13 @@ if [ ! -r $ISODIR/boot/memtest.bin ]; then
     mv ${VERBOSE} $ISODIR/boot/memtest86+-* $ISODIR/boot/memtest.bin
 fi
 
+# branding
+get_rpms "$SCRATCHDIR" branding-xcp-ng
+rpm2cpio $SCRATCHDIR/branding-xcp-ng-*.rpm |
+    (cd $ISODIR && cpio ${VERBOSE} -idm ./usr/src/branding/EULA ./usr/src/branding/LICENSES)
+mv ${VERBOSE} $ISODIR/usr/src/branding/* $ISODIR/
+(cd $ISODIR && rmdir -p usr/src/branding/)
+
 
 # optional local repo
 
