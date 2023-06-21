@@ -100,7 +100,7 @@ sudo ./scripts/create-installimg.sh \
     --srcurl file://$HOME/mirrors/xcpng/8.3 \
     --output xcp-ng-8.3.testing.iso \
     -V "XCP-NG_830_TEST" \
-    8.3:testing install-8.3-testing.img
+    8.3:testing install-8.3.testing.img
 ```
 
 ### tip of 8.2 (8.2 + updates)
