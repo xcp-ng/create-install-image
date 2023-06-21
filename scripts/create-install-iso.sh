@@ -238,6 +238,7 @@ cp ${VERBOSE} -p \
 
 ## create final ISO
 
+# UEFI bootloader
 if false; then
     # grub-mkrescue is "the reference", providing largest platform
     # support for booting, but OTOH adds tons of stuff we don't need
@@ -245,6 +246,8 @@ if false; then
     # is kept handy for when we need it, since the command options are
     # not that obvious. Eg. we may want to add support for x86 Macs
     # some day.
+    # Note this current invocation seems to miss UEFI boot support for
+    # some reason.
 
     MKRESCUE=$(command -v grub2-mkrescue || command -v grub-mkrescue) || die "could not find grub[2]-mkrescue"
     # grub2-mkrescue (centos) vs. grub-mkrescue (debian, RoW?)
@@ -263,8 +266,6 @@ if false; then
         -o "$OUTISO" $ISODIR
 
 else
-    # UEFI bootloader
-
     BOOTX64=$(mktemp "$TMPDIR/bootx64-XXXXXX.efi")
 
     # unpack grub-efi.rpm
