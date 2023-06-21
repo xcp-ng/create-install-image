@@ -20,6 +20,9 @@ Options:
                               default: https://updates.xcp-ng.org/<MAJOR>/<DIST>
     -D|--define-repo <NICK>!<URL>
                               add yum repo with name <NICK> and base URL <URL>
+    --efi-installer <mode>    select how to build the GRUB EFI binary. Valid modes:
+                              rpm: take prebuilt xenserver/grubx64.efi from rpm
+                              mkimage: call mkimage to generate an EFI binary
     --netinstall              do not include repository in ISO
     --sign <NICK> <KEYID>     sign repomd with default gpg key <KEYID>, with readable <NICK>
     --force-overwrite         don't abort if output file already exists
@@ -36,6 +39,7 @@ KEYNICK=
 SRCURL=
 declare -A CUSTOM_REPOS=()
 RPMARCH="x86_64"
+EFIMODE="rpm"
 while [ $# -ge 1 ]; do
     case "$1" in
         --help|-h)
@@ -78,6 +82,14 @@ while [ $# -ge 1 ]; do
                     ;;
             esac
             CUSTOM_REPOS["$nick"]="$url"
+            shift
+            ;;
+        --efi-installer)
+            [ $# -ge 2 ] || die_usage "$1 needs an argument"
+            case "$2" in
+                rpm|mkimage) EFIMODE="$2" ;;
+                *) die "unknown --efi-installer '$2'" ;;
+            esac
             shift
             ;;
         --sign)
@@ -271,18 +283,25 @@ else
     mkdir "$SCRATCHDIR/grub"
     rpm2cpio $SCRATCHDIR/grub-efi-*.rpm | (cd "$SCRATCHDIR/grub" && cpio ${VERBOSE} -idm)
 
-    BOOTX64=$(mktemp "$TMPDIR/bootx64-XXXXXX.efi")
+    case "$EFIMODE" in
+        rpm)
+            BOOTX64="$SCRATCHDIR/grub/boot/efi/EFI/xenserver/grubx64.efi"
+            ;;
+        mkimage)
+            BOOTX64=$(mktemp "$TMPDIR/bootx64-XXXXXX.efi")
 
-    "$MKIMAGE" --directory "$SCRATCHDIR/grub/usr/lib/grub/x86_64-efi" --prefix '()/EFI/xenserver' \
-               $VERBOSE \
-               --output "$BOOTX64" \
-               --format 'x86_64-efi' --compression 'auto' \
-               'part_gpt' 'part_msdos' 'part_apple' 'iso9660'
+            "$MKIMAGE" --directory "$SCRATCHDIR/grub/usr/lib/grub/x86_64-efi" --prefix '()/EFI/xenserver' \
+                       $VERBOSE \
+                       --output "$BOOTX64" \
+                       --format 'x86_64-efi' --compression 'auto' \
+                       'part_gpt' 'part_msdos' 'part_apple' 'iso9660'
 
-    # grub modules
-    # FIXME: too many modules?
-    tar -C "$SCRATCHDIR/grub/usr/lib" -cf - grub/x86_64-efi |
-        tar -C "$ISODIR/boot" -xf - ${VERBOSE}
+            # grub modules
+            # FIXME: too many modules?
+            tar -C "$SCRATCHDIR/grub/usr/lib" -cf - grub/x86_64-efi |
+                tar -C "$ISODIR/boot" -xf - ${VERBOSE}
+            ;;
+    esac
 
     "${FAKETIME[@]}" mformat -i "$ISODIR/boot/efiboot.img" -N 0 -C -f 2880 -L 16 ::.
     "${FAKETIME[@]}" mmd     -i "$ISODIR/boot/efiboot.img" ::/EFI ::/EFI/BOOT
