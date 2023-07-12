@@ -202,7 +202,17 @@ mv ${VERBOSE} $ISODIR/usr/src/branding/* $ISODIR/
 
 # optional local repo
 
-sed -i "s,@@TIMESTAMP@@,$(date +%s.00)," \
+rpm2cpio $SCRATCHDIR/branding-xcp-ng-*.rpm |
+    (cd $ISODIR && cpio ${VERBOSE} -i --to-stdout ./usr/src/branding/branding) |
+    grep -E "^(PLATFORM|PRODUCT)_" > $TMPDIR/branding.sh
+. $TMPDIR/branding.sh
+
+sed -i \
+    -e "s,@@TIMESTAMP@@,$(date +%s.00)," \
+    -e "s,@@PLATFORM_NAME@@,$PLATFORM_NAME," \
+    -e "s,@@PLATFORM_VERSION@@,$PLATFORM_VERSION," \
+    -e "s,@@PRODUCT_BRAND@@,$PRODUCT_BRAND," \
+    -e "s,@@PRODUCT_VERSION@@,$PRODUCT_VERSION," \
     $ISODIR/.treeinfo
 
 if [ $DOREPO = 1 ]; then

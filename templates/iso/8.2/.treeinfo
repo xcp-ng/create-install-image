@@ -1,10 +1,10 @@
 [platform]
-name = XCP
-version = 3.2.1
+name = @@PLATFORM_NAME@@
+version = @@PLATFORM_VERSION@@
 
 [branding]
-name = XCP-ng
-version = 8.2.1
+name = @@PRODUCT_BRAND@@
+version = @@PRODUCT_VERSION@@
 
 [build]
 number = release/yangtze/master/58
@@ -15,11 +15,11 @@ key2 = RPM-GPG-KEY-CH-8-LCM
 key3 = RPM-GPG-KEY-Platform-V1
 
 [general]
-name = XCP-ng-8.2.1
-family = XCP-ng
+name = @@PRODUCT_BRAND@@-@@PRODUCT_VERSION@@
+family = @@PRODUCT_BRAND@@
 timestamp = @@TIMESTAMP@@
 variant =
-version = 8.2.1
+version = @@PRODUCT_VERSION@@
 packagedir =
 arch = x86_64
 
