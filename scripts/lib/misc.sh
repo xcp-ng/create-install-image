@@ -165,7 +165,6 @@ setup_yum_download() {
                 > "$YUMREPOSD/$repoid.repo"
         YUMFLAGS+=("--enablerepo=$repoid")
     done
-    ls -l "$YUMREPOSD"
 
     # availability of yumdownloader does not imply that of yum
     local YUM=$(command -v yum || command -v dnf) || die "no yum or dnf found"
