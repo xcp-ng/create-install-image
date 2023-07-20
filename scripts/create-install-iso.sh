@@ -215,7 +215,10 @@ else
     # FIXME: should be generated above instead?
     rm ${VERBOSE} "$ISODIR/.treeinfo"
 
-    # FIXME: trigger netinstall mode?
+    # trigger netinstall mode
+    sed -i -e "s@/vmlinuz@/vmlinuz netinstall@" \
+        "$ISODIR"/*/*/grub*.cfg \
+        "$ISODIR"/boot/isolinux/isolinux.cfg
 fi
 
 
