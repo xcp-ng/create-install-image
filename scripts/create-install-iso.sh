@@ -20,6 +20,9 @@ Options:
                               default: https://updates.xcp-ng.org/<MAJOR>/<DIST>
     -D|--define-repo <NICK>!<URL>
                               add yum repo with name <NICK> and base URL <URL>
+    --efi-installer <mode>    select how to build the GRUB EFI binary. Valid modes:
+                              rpm: take prebuilt xenserver/grubx64.efi from rpm
+                              mkimage: call mkimage to generate an EFI binary
     --netinstall              do not include repository in ISO
     --sign <NICK> <KEYID>     sign repomd with default gpg key <KEYID>, with readable <NICK>
     --force-overwrite         don't abort if output file already exists
@@ -36,6 +39,7 @@ KEYNICK=
 SRCURL=
 declare -A CUSTOM_REPOS=()
 RPMARCH="x86_64"
+EFIMODE="rpm"
 while [ $# -ge 1 ]; do
     case "$1" in
         --help|-h)
@@ -78,6 +82,14 @@ while [ $# -ge 1 ]; do
                     ;;
             esac
             CUSTOM_REPOS["$nick"]="$url"
+            shift
+            ;;
+        --efi-installer)
+            [ $# -ge 2 ] || die_usage "$1 needs an argument"
+            case "$2" in
+                rpm|mkimage) EFIMODE="$2" ;;
+                *) die "unknown --efi-installer '$2'" ;;
+            esac
             shift
             ;;
         --sign)
@@ -180,10 +192,27 @@ if [ ! -r $ISODIR/boot/memtest.bin ]; then
     mv ${VERBOSE} $ISODIR/boot/memtest86+-* $ISODIR/boot/memtest.bin
 fi
 
+# branding
+get_rpms "$SCRATCHDIR" branding-xcp-ng
+rpm2cpio $SCRATCHDIR/branding-xcp-ng-*.rpm |
+    (cd $ISODIR && cpio ${VERBOSE} -idm ./usr/src/branding/EULA ./usr/src/branding/LICENSES)
+mv ${VERBOSE} $ISODIR/usr/src/branding/* $ISODIR/
+(cd $ISODIR && rmdir -p usr/src/branding/)
+
 
 # optional local repo
 
-sed -i "s,@@TIMESTAMP@@,$(date +%s.00)," \
+rpm2cpio $SCRATCHDIR/branding-xcp-ng-*.rpm |
+    (cd $ISODIR && cpio ${VERBOSE} -i --to-stdout ./usr/src/branding/branding) |
+    grep -E "^(PLATFORM|PRODUCT)_" > $TMPDIR/branding.sh
+. $TMPDIR/branding.sh
+
+sed -i \
+    -e "s,@@TIMESTAMP@@,$(date +%s.00)," \
+    -e "s,@@PLATFORM_NAME@@,$PLATFORM_NAME," \
+    -e "s,@@PLATFORM_VERSION@@,$PLATFORM_VERSION," \
+    -e "s,@@PRODUCT_BRAND@@,$PRODUCT_BRAND," \
+    -e "s,@@PRODUCT_VERSION@@,$PRODUCT_VERSION," \
     $ISODIR/.treeinfo
 
 if [ $DOREPO = 1 ]; then
@@ -205,10 +234,10 @@ if [ $DOREPO = 1 ]; then
             $ISODIR/.treeinfo
 
         # don't try to validate repo sig if we put none
-        [ -z "$VERBOSE" ] || echo "adding no-repo-gpgcheck to boot/isolinux/isolinux.cfg boot/grub/grub*.cfg"
+        [ -z "$VERBOSE" ] || echo "adding no-repo-gpgcheck to boot/isolinux/isolinux.cfg EFI/xenserver/grub*.cfg"
         sed -i "s,/vmlinuz,/vmlinuz no-repo-gpgcheck," \
             $ISODIR/boot/isolinux/isolinux.cfg \
-            $ISODIR/boot/grub/grub*.cfg
+            $ISODIR/EFI/xenserver/grub*.cfg
     fi
 else
     # no repo
@@ -235,9 +264,19 @@ cp ${VERBOSE} -p \
    \
    $ISODIR/boot/isolinux/
 
+# files to copy for LegacyBIOS PXE support
+# FIXME: location for backward compatibility with XS and XCP-ng-8.2
+mkdir "$ISODIR/boot/pxelinux"
+cp ${VERBOSE} -p \
+   "$SCRATCHDIR/syslinux/usr/share/syslinux/pxelinux.0" \
+   "$SCRATCHDIR/syslinux/usr/share/syslinux/mboot.c32" \
+   "$SCRATCHDIR/syslinux/usr/share/syslinux/menu.c32" \
+   \
+   "$ISODIR/boot/pxelinux/"
 
 ## create final ISO
 
+# UEFI bootloader
 if false; then
     # grub-mkrescue is "the reference", providing largest platform
     # support for booting, but OTOH adds tons of stuff we don't need
@@ -245,6 +284,8 @@ if false; then
     # is kept handy for when we need it, since the command options are
     # not that obvious. Eg. we may want to add support for x86 Macs
     # some day.
+    # Note this current invocation seems to miss UEFI boot support for
+    # some reason.
 
     MKRESCUE=$(command -v grub2-mkrescue || command -v grub-mkrescue) || die "could not find grub[2]-mkrescue"
     # grub2-mkrescue (centos) vs. grub-mkrescue (debian, RoW?)
@@ -263,27 +304,47 @@ if false; then
         -o "$OUTISO" $ISODIR
 
 else
-    # UEFI bootloader
-
-    BOOTX64=$(mktemp "$TMPDIR/bootx64-XXXXXX.efi")
-
     # unpack grub-efi.rpm
     get_rpms "$SCRATCHDIR" grub-efi
     mkdir "$SCRATCHDIR/grub"
     rpm2cpio $SCRATCHDIR/grub-efi-*.rpm | (cd "$SCRATCHDIR/grub" && cpio ${VERBOSE} -idm)
 
-    "$MKIMAGE" --directory "$SCRATCHDIR/grub/usr/lib/grub/x86_64-efi" --prefix '()/boot/grub' \
-               $VERBOSE \
-               --output "$BOOTX64" \
-               --format 'x86_64-efi' --compression 'auto' \
-               'part_gpt' 'part_msdos' 'part_apple' 'iso9660'
-    "${FAKETIME[@]}" mformat -i "$ISODIR/boot/efiboot.img" -N 0 -C -f 2880 -L 16 ::.
-    "${FAKETIME[@]}" mmd     -i "$ISODIR/boot/efiboot.img" ::/efi ::/efi/boot
-    "${FAKETIME[@]}" mcopy   -i "$ISODIR/boot/efiboot.img" "$BOOTX64" ::/efi/boot/bootx64.efi
+    case "$EFIMODE" in
+        rpm)
+            BOOTX64="$SCRATCHDIR/grub/boot/efi/EFI/xenserver/grubx64.efi"
+            ;;
+        mkimage)
+            BOOTX64=$(mktemp "$TMPDIR/bootx64-XXXXXX.efi")
 
-    # grub modules
-    # FIXME: too many modules?
-    tar -C "$SCRATCHDIR/grub/usr/lib" -cf - grub/x86_64-efi | tar -C "$ISODIR/boot" -xf - ${VERBOSE}
+            "$MKIMAGE" --directory "$SCRATCHDIR/grub/usr/lib/grub/x86_64-efi" --prefix '()/EFI/xenserver' \
+                       $VERBOSE \
+                       --output "$BOOTX64" \
+                       --format 'x86_64-efi' --compression 'auto' \
+                       'part_gpt' 'part_msdos' 'part_apple' 'iso9660'
+
+            # grub modules
+            # FIXME: too many modules?
+            tar -C "$SCRATCHDIR/grub/usr/lib" -cf - grub/x86_64-efi |
+                tar -C "$ISODIR/boot" -xf - ${VERBOSE}
+            ;;
+    esac
+
+    "${FAKETIME[@]}" mformat -i "$ISODIR/boot/efiboot.img" -N 0 -C -f 2880 -L 16 ::.
+    "${FAKETIME[@]}" mmd     -i "$ISODIR/boot/efiboot.img" ::/EFI ::/EFI/BOOT
+    "${FAKETIME[@]}" mcopy   -i "$ISODIR/boot/efiboot.img" "$BOOTX64" ::/EFI/BOOT/BOOTX64.EFI
+
+    # Seems some BIOSes set this image as root instead of the ISO,
+    # need a (slightly modified) grub.cfg to embed inside
+    GRUBEFIBOOTCFGPATCH=$(find_config grub-efiboot-cfg.patch)
+    cp "$ISODIR/EFI/xenserver/grub.cfg" "$TMPDIR/grub-efiboot.cfg"
+    patch $([ -n "$VERBOSE" ] || printf -- "--quiet") "$TMPDIR/grub-efiboot.cfg" "$GRUBEFIBOOTCFGPATCH"
+    "${FAKETIME[@]}" mmd     -i "$ISODIR/boot/efiboot.img" ::/EFI/xenserver
+    "${FAKETIME[@]}" mcopy   -i "$ISODIR/boot/efiboot.img" "$TMPDIR/grub-efiboot.cfg" ::/EFI/xenserver/grub.cfg
+
+
+    # files to copy for UEFI PXE support
+    # FIXME: location for backward compatibility with XS and XCP-ng-8.2
+    cp -p "$BOOTX64" "$ISODIR/EFI/xenserver/"
 
     genisoimage \
         -o "$OUTISO" \

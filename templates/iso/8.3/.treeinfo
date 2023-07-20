@@ -1,8 +1,8 @@
 [system-v1]
-platform_name = XCP
-platform_version = 3.3.0
-product_name = XCP-ng
-product_version = 8.3
+platform_name = @@PLATFORM_NAME@@
+platform_version = @@PLATFORM_VERSION@@
+product_name = @@PRODUCT_BRAND@@
+product_version = @@PRODUCT_VERSION@@
 
 [build]
 number = cloud
@@ -10,11 +10,11 @@ number = cloud
 key1 = RPM-GPG-KEY-xcpng
 
 [general]
-name = XCP-ng-8.3
-family = XCP-ng
+name = @@PRODUCT_BRAND@@-@@PRODUCT_VERSION@@
+family = @@PRODUCT_BRAND@@
 timestamp = @@TIMESTAMP@@
 variant =
-version = 8.3
+version = @@PRODUCT_VERSION@@
 packagedir =
 arch = x86_64
 
