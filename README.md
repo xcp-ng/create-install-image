@@ -22,7 +22,7 @@ They require to install some additional packages first:
 
 ```
 sudo yum install -y genisoimage syslinux grub-tools createrepo_c ltfp
-sudo yum install -y --enablerepo=epel gnupg1
+sudo yum install -y --enablerepo=epel gnupg1 libfaketime
 ```
 
 
