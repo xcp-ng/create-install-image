@@ -21,7 +21,7 @@ XCP-ng versions.
 They require to install some additional packages first:
 
 ```
-sudo yum install -y genisoimage syslinux grub-tools createrepo_c
+sudo yum install -y genisoimage syslinux grub-tools createrepo_c ltfp
 sudo yum install -y --enablerepo=epel gnupg1
 ```
 
@@ -53,6 +53,13 @@ This scripts excludes from the mirror:
 - source RPMs
 - development RPMs
 - debugging-symbols RPMs
+
+:warning: If the script fails with the error message `"Cannot assign requested address"`,
+you need to configure `lftp` DNS resolution order to first look for IPv4
+addresses by adding this line to `~/.lftprc`:
+```
+set dns:order "inet inet6"
+```
 
 ## configuration layers and package repositories
 
