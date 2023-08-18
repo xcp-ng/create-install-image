@@ -330,6 +330,10 @@ else
     esac
 
     "${FAKETIME[@]}" mformat -i "$ISODIR/boot/efiboot.img" -N 0 -C -f 2880 -L 16 ::.
+    # Under faketime on CentOS 7 the last sector gets "random" contents instead of zero.
+    # We're not sure why (FIXME?) but make sure that data does not leak or polute.
+    dd if=/dev/zero of="$ISODIR/boot/efiboot.img" bs=512 count=1 seek=$((2880*2 - 1))
+
     "${FAKETIME[@]}" mmd     -i "$ISODIR/boot/efiboot.img" ::/EFI ::/EFI/BOOT
     "${FAKETIME[@]}" mcopy   -i "$ISODIR/boot/efiboot.img" "$BOOTX64" ::/EFI/BOOT/BOOTX64.EFI
 
