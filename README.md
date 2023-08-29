@@ -21,8 +21,8 @@ XCP-ng versions.
 They require to install some additional packages first:
 
 ```
-sudo yum install -y genisoimage syslinux grub-tools createrepo_c
-sudo yum install -y --enablerepo=epel gnupg1 libfaketime
+sudo yum install -y genisoimage syslinux grub-tools createrepo_c libfaketime
+sudo yum install -y --enablerepo=epel gnupg1
 ```
 
 
