@@ -21,7 +21,7 @@ XCP-ng versions.
 They require to install some additional packages first:
 
 ```
-sudo yum install -y genisoimage syslinux grub-tools createrepo_c ltfp
+sudo yum install -y genisoimage syslinux grub-tools createrepo_c
 sudo yum install -y --enablerepo=epel gnupg1 libfaketime
 ```
 
@@ -46,6 +46,12 @@ Creates `install-$RELEASE.img` for input to `create-install-iso`, from:
 - additional files from `./installimg/$RELEASE/`
 
 ### `./scripts/mirror-repos.sh`
+
+Note this script requires the `lftp` tool to do its job:
+
+```
+sudo yum install -y --enablerepo=epel lftp
+```
 
 Creates a local mirror of a subset of an official set of repositories
 for a given XCP-ng version, suitable for building an installation ISO.
