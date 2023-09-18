@@ -69,7 +69,6 @@ gmp
 gnupg2
 gpgme
 grep
-gssproxy
 gzip
 hardlink
 host-installer-startup
@@ -149,8 +148,7 @@ libtirpc
 libuser
 libutempter
 libuuid
-libverto
-libverto-libevent
+libverto-tevent  # pin libverto-module-base to libverto default
 libxml2
 linux-firmware
 lldpad

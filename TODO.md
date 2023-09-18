@@ -16,8 +16,3 @@
   * still some packages to be cleaned up
     - [ ] limit firwmare to that useable by provided drivers
     - [ ] /var/cache
-* [ ] Packages/ for 8.2.0 contains libverto-libevent instead of
-      libverto-tevent (both fulfill the same Provides). Could it have
-      adverse effects? Does this problem affect 8.3 ISOs? Create a yum
-      conf, used when Packages/ is generated, where in case of doubt
-      libverto-tevent be prefered?
