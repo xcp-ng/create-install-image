@@ -124,8 +124,8 @@ YUMFLAGS=(
 yum ${YUMFLAGS[@]} repolist all
 
 PACKAGES_LST=$(find_config packages.lst)
-xargs < "$PACKAGES_LST" \
-    yum ${YUMFLAGS[@]} install \
+sed "s/#.*//" < "$PACKAGES_LST" |
+    xargs yum ${YUMFLAGS[@]} install \
         --assumeyes \
         --noplugins
 

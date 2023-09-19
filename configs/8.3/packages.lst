@@ -74,6 +74,7 @@ kernel-alt
 keyutils
 kmod
 kpartx
+libverto-tevent  # pin libverto-module-base to libverto default
 linux-firmware
 lldpad
 logrotate
