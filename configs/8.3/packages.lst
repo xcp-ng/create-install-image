@@ -146,7 +146,6 @@ vendor-drivers
 vim-minimal
 wget
 xen-dom0-tools
-xen-installer-files
 xen-tools
 xcp-ng-release
 xcp-ng-release-presets
