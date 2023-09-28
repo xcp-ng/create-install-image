@@ -5,8 +5,6 @@ avago-megaraid-sas
 avago-mpt3sas
 basesystem
 biosdevname
-boost-system
-boost-thread
 bridge-utils
 broadcom-bnxt-en
 bzip2
