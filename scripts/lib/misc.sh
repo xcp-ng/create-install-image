@@ -144,6 +144,11 @@ setup_yum_download() {
         --releasever="$DIST"
     )
 
+    setup_yum_repos "${YUMDLFLAGS[@]}"
+}
+
+setup_yum_repos() {
+    # repos declated in yum-repos.conf.tmpl
     find_all_configs yum-repos.conf.tmpl | while read YUMREPOSCONF_TMPL; do
         reponame=$(basename $(dirname "$YUMREPOSCONF_TMPL"))
         cat "$YUMREPOSCONF_TMPL" |
@@ -153,7 +158,7 @@ setup_yum_download() {
                 > "$YUMREPOSD/$reponame.repo"
     done
 
-    # custom repos
+    # custom repos from cmdline
     CUSTOMREPO_TEMPLATE=$(find_config CUSTOMREPO.tmpl)
     for repoid in "${!CUSTOM_REPOS[@]}"; do
         repourl="${CUSTOM_REPOS[$repoid]}"
@@ -169,7 +174,8 @@ setup_yum_download() {
     local YUM=$(command -v yum || command -v dnf) || die "no yum or dnf found"
     # summary of repos
     test ! -r /var/cache/yum/xcpng-base || die "yum system cache should not be there to start with"
-    "$YUM" "${YUMDLFLAGS[@]}" repolist all
+    [ -z "$VERBOSE" ] || ls "$YUMREPOSD"
+    "$YUM" "$@" repolist all
     # double-check we don't let yum reintroduce that cache by mistake
     test ! -r /var/cache/yum/xcpng-base || die "yum system cache should not have been created"
 }
