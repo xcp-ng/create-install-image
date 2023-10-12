@@ -163,7 +163,6 @@ setup_yum_download() {
                 -e "s,@@REPOURL@@,$repourl," \
                 -e "s,@@RPMARCH@@,$RPMARCH," \
                 > "$YUMREPOSD/$repoid.repo"
-        YUMFLAGS+=("--enablerepo=$repoid")
     done
 
     # availability of yumdownloader does not imply that of yum
