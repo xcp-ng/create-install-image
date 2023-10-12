@@ -169,7 +169,7 @@ setup_yum_download() {
     local YUM=$(command -v yum || command -v dnf) || die "no yum or dnf found"
     # summary of repos
     test ! -r /var/cache/yum/xcpng-base || die "yum system cache should not be there to start with"
-    "$YUM" ${YUMDLFLAGS[@]} repolist all
+    "$YUM" "${YUMDLFLAGS[@]}" repolist all
     # double-check we don't let yum reintroduce that cache by mistake
     test ! -r /var/cache/yum/xcpng-base || die "yum system cache should not have been created"
 }

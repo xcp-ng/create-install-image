@@ -121,11 +121,11 @@ YUMFLAGS=(
 )
 
 # summary of repos
-yum ${YUMFLAGS[@]} repolist all
+yum "${YUMFLAGS[@]}" repolist all
 
 PACKAGES_LST=$(find_config packages.lst)
 sed "s/#.*//" < "$PACKAGES_LST" |
-    xargs yum ${YUMFLAGS[@]} install \
+    xargs yum "${YUMFLAGS[@]}" install \
         --assumeyes \
         --noplugins
 
