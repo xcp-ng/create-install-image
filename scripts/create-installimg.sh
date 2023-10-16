@@ -102,16 +102,6 @@ cat "$YUMCONF_TMPL" |
     > "$YUMCONF"
 [ -z "$VERBOSE" ] || cat "$YUMCONF"
 
-find_all_configs yum-repos.conf.tmpl | while read YUMREPOSCONF_TMPL; do
-    reponame=$(basename $(dirname "$YUMREPOSCONF_TMPL"))
-    cat "$YUMREPOSCONF_TMPL" |
-        sed \
-            -e "s,@@SRCURL@@,$SRCURL," \
-            -e "s,@@RPMARCH@@,$RPMARCH," \
-            > "$YUMREPOSD/$reponame.repo"
-done
-[ -z "$VERBOSE" ] || ls "$YUMREPOSD"
-
 ROOTFS=$(mktemp -d "$TMPDIR/rootfs-XXXXXX")
 YUMFLAGS=(
     --config="$YUMCONF"
@@ -120,12 +110,11 @@ YUMFLAGS=(
     $([ -n "$VERBOSE" ] || printf -- "-q")
 )
 
-# summary of repos
-yum ${YUMFLAGS[@]} repolist all
+setup_yum_repos "${YUMFLAGS[@]}"
 
 PACKAGES_LST=$(find_config packages.lst)
 sed "s/#.*//" < "$PACKAGES_LST" |
-    xargs yum ${YUMFLAGS[@]} install \
+    xargs yum "${YUMFLAGS[@]}" install \
         --assumeyes \
         --noplugins
 
