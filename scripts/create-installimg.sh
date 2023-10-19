@@ -14,6 +14,7 @@ Usage: $0 [<options>] <base-config>[:<config-overlay>]*
 Options:
     --srcurl <URL>            get RPMs from repo at <URL>
     --arch <ARCH>             RPM archivecture to build for (default: x86_64)
+    --pkgtool dnf             use DNF instead of YUM
     -D|--define-repo <NICK>!<URL>
                               add yum repo with name <NICK> and base URL <URL>
     --output|-o <OUTPUT.IMG>  choose a different output name
@@ -25,6 +26,7 @@ EOF
 VERBOSE=
 OUTPUT_IMG=
 FORCE_OVERWRITE=0
+PKGTOOL=yum
 declare -A CUSTOM_REPOS=()
 RPMARCH="x86_64"
 while [ $# -ge 1 ]; do
@@ -68,6 +70,11 @@ while [ $# -ge 1 ]; do
         --force-overwrite)
             FORCE_OVERWRITE=1
             ;;
+        --pkgtool)
+            [ $# -ge 2 ] || die_usage "$1 needs an argument"
+            PKGTOOL="$2"
+            shift
+            ;;
         -*)
             die_usage "unknown flag '$1'"
             ;;
@@ -91,8 +98,14 @@ if [ "$FORCE_OVERWRITE" = 0 -a -e "$OUTPUT_IMG" ]; then
 fi
 [ ! -d "$OUTPUT_IMG" ] || die "'$OUTPUT_IMG' exists and is a directory"
 
-command -v yum >/dev/null || die "required tool not found: yum"
+command -v "$PKGTOOL" >/dev/null || die "required tool not found: $PKGTOOL"
 #command -v fakeroot >/dev/null || die "required tool not found: fakeroot"
+
+case "$PKGTOOL" in
+    yum) DLTOOL=(yumdownloader) ;;
+    dnf) DLTOOL=(dnf download) ;;
+    *) die "unsupported pkgtool '$PKGTOOL'" ;;
+esac
 
 
 #### create base rootfs
@@ -119,7 +132,7 @@ setup_yum_repos "${YUMFLAGS[@]}"
 
 PACKAGES_LST=$(find_config packages.lst)
 sed "s/#.*//" < "$PACKAGES_LST" |
-    xargs yum "${YUMFLAGS[@]}" install \
+    xargs "$PKGTOOL" "${YUMFLAGS[@]}" install \
         --assumeyes \
         --noplugins
 

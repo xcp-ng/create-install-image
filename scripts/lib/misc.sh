@@ -110,7 +110,12 @@ CLEANUP_DIRS+=("$TMPDIR")
 # infrastructure for fetching RPMs from source repo
 
 yumdl_is_dnf() {
-    yumdownloader --version | grep -q dnf
+    if command -v yumdownloader >/dev/null; then
+        yumdownloader --version | grep -q dnf
+    else
+        # assume we're using dnf without a yumdownloader wrapper
+        true
+    fi
 }
 
 setup_yum_download() {
@@ -125,12 +130,12 @@ setup_yum_download() {
     YUMLOGDIR=$(mktemp -d "$TMPDIR/logs-XXXXXX")
     DUMMYROOT=$(mktemp -d "$TMPDIR/root-XXXXXX")
 
-    if yumdl_is_dnf; then
-        enable_plugins=1
-        echo >&2 "WARNING: yumdownloader is dnf wrapper, I have to enable dnf plugins!"
-    else
-        enable_plugins=0
-    fi
+    # if yumdl_is_dnf; then
+    #     enable_plugins=1
+    #     echo >&2 "WARNING: yumdownloader is dnf wrapper, I have to enable dnf plugins!"
+    # else
+    enable_plugins=0
+    # fi
 
     cat "$YUMDLCONF_TMPL" |
         sed \
@@ -175,12 +180,11 @@ setup_yum_repos() {
         done
     fi
 
-    # availability of yumdownloader does not imply that of yum
-    local YUM=$(command -v yum || command -v dnf) || die "no yum or dnf found"
     # summary of repos
+    # FIXME: update for DNF?
     test ! -r /var/cache/yum/xcpng-base || die "yum system cache should not be there to start with"
     [ -z "$VERBOSE" ] || ls "$YUMREPOSD"
-    "$YUM" "$@" repolist all
+    "$PKGTOOL" "$@" repolist all
     # double-check we don't let yum reintroduce that cache by mistake
     test ! -r /var/cache/yum/xcpng-base || die "yum system cache should not have been created"
 }
@@ -194,7 +198,7 @@ get_rpms() {
     local DESTDIR="$1"
     shift
     if [ -n "$YUMDLFLAGS" ]; then
-        (cd "$DESTDIR" && yumdownloader $OPTS "${YUMDLFLAGS[@]}" --installroot="$DUMMYROOT" "$@")
+        (cd "$DESTDIR" && "${DLTOOL[@]}" $OPTS "${YUMDLFLAGS[@]}" --installroot="$DUMMYROOT" "$@")
     else
         die "Must configure yum download before attempting to download"
     fi
