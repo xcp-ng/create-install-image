@@ -189,6 +189,7 @@ get_rpms "$SCRATCHDIR" memtest86+
 rpm2cpio $SCRATCHDIR/memtest86+-*.rpm | (cd $ISODIR && cpio ${VERBOSE} -idm "./boot/*")
 if [ ! -r $ISODIR/boot/memtest.bin ]; then
     # older 5.x packaging
+    rm ${VERBOSE} $ISODIR/boot/elf-memtest86+-*
     mv ${VERBOSE} $ISODIR/boot/memtest86+-* $ISODIR/boot/memtest.bin
 fi
 
