@@ -25,6 +25,16 @@ sudo yum install -y genisoimage syslinux grub-tools createrepo_c libfaketime
 sudo yum install -y --enablerepo=epel gnupg1
 ```
 
+## Overview of the generation process
+
+The sequence of steps is:
+- `mirror`: (optionally) create a (partial) *local mirror* from
+  *source repos*, using [`mirror-repos.sh`](#scriptscreate-install-isosh)
+- `installimg`: create *installer root filesystem* from the *local
+  mirror* or from *source repos*, using
+  [`./scripts/create-installimg.sh`](#scriptscreate-installimgsh)
+- `iso`: create XCP-ng *installation ISO*, from *installer root
+  filesystem*, and from *local mirror* or *source repos*
 
 ## Individual scripts
 
@@ -59,6 +69,25 @@ This scripts excludes from the mirror:
 - source RPMs
 - development RPMs
 - debugging-symbols RPMs
+
+> [!NOTE]
+>
+> this includes much more packages (order of a few gigabytes) than
+> needed for producing the install ISO, notably build-dependencies
+> that are not needed by the installer, and not get installed
+> themselves on the XCP-ng host either.  But a local mirror which you
+> control will provide image reproducibility, through the ability to
+> work offline (including reproducibility when the *source repo*
+> changes between 2 runs, and consistency when it changes between the
+> `installimg` and `iso` steps).
+
+> [!NOTE]
+>
+> this is not a general-purpose mirroring tool.  It will notably not
+> mirror a number of development packages, which you would need to
+> build extra software or rebuild packages for XCP-ng.  If you need
+> more, use other tools like yum's `reposync` (which sadly we could
+> not build on, due to its complete lack of filtering features).
 
 > [!WARNING]
 >
