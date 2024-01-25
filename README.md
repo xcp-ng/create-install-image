@@ -60,12 +60,14 @@ This scripts excludes from the mirror:
 - development RPMs
 - debugging-symbols RPMs
 
-:warning: If the script fails with the error message `"Cannot assign requested address"`,
-you need to configure `lftp` DNS resolution order to first look for IPv4
-addresses by adding this line to `~/.lftprc`:
-```
-set dns:order "inet inet6"
-```
+> [!WARNING]
+>
+> If the script fails with the error message `"Cannot assign requested address"`,
+> you need to configure `lftp` DNS resolution order to first look for IPv4
+> addresses by adding this line to `~/.lftprc`:
+> ```
+> set dns:order "inet inet6"
+> ```
 
 ## Configuration layers and package repositories
 
