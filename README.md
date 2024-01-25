@@ -26,7 +26,7 @@ sudo yum install -y --enablerepo=epel gnupg1
 ```
 
 
-## individual scripts
+## Individual scripts
 
 All script have a `--help` documenting all their options.
 
@@ -67,7 +67,7 @@ addresses by adding this line to `~/.lftprc`:
 set dns:order "inet inet6"
 ```
 
-## configuration layers and package repositories
+## Configuration layers and package repositories
 
 Configuration layers are defined as a subdirectory of the `configs/`
 directory.  Commands are given a layer search path as
@@ -97,7 +97,7 @@ used multiple times to define more than one custom repo).  They will
 be used by `yum` using the first `CUSTOMREPO.tmpl` template found in
 the layer search path (one is provided in `base`).
 
-## examples
+## Examples
 
 ### 8.3 updates and testing
 
@@ -170,7 +170,7 @@ reason still to be determined)
    -device usb-storage,bus=xhci.0,drive=stick
   ```
 
-## testing that scripts run correctly
+## Testing that scripts run correctly
 
 Minimal tests to generate install ISO for a few important
 configurations are available in `tests/`.  They require one-time
