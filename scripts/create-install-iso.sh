@@ -193,7 +193,7 @@ if [ ! -r $ISODIR/boot/memtest.bin ]; then
     mv ${VERBOSE} $ISODIR/boot/memtest86+-* $ISODIR/boot/memtest.bin
 fi
 
-# branding
+# branding: EULA, LICENSES
 get_rpms "$SCRATCHDIR" branding-xcp-ng
 rpm2cpio $SCRATCHDIR/branding-xcp-ng-*.rpm |
     (cd $ISODIR && cpio ${VERBOSE} -idm ./usr/src/branding/EULA ./usr/src/branding/LICENSES)
@@ -203,20 +203,20 @@ mv ${VERBOSE} $ISODIR/usr/src/branding/* $ISODIR/
 
 # optional local repo
 
-rpm2cpio $SCRATCHDIR/branding-xcp-ng-*.rpm |
-    (cd $ISODIR && cpio ${VERBOSE} -i --to-stdout ./usr/src/branding/branding) |
-    grep -E "^(PLATFORM|PRODUCT)_" > $TMPDIR/branding.sh
-. $TMPDIR/branding.sh
-
-sed -i \
-    -e "s,@@TIMESTAMP@@,$(date +%s.00)," \
-    -e "s,@@PLATFORM_NAME@@,$PLATFORM_NAME," \
-    -e "s,@@PLATFORM_VERSION@@,$PLATFORM_VERSION," \
-    -e "s,@@PRODUCT_BRAND@@,$PRODUCT_BRAND," \
-    -e "s,@@PRODUCT_VERSION@@,$PRODUCT_VERSION," \
-    $ISODIR/.treeinfo
-
 if [ $DOREPO = 1 ]; then
+    rpm2cpio $SCRATCHDIR/branding-xcp-ng-*.rpm |
+        (cd $ISODIR && cpio ${VERBOSE} -i --to-stdout ./usr/src/branding/branding) |
+        grep -E "^(PLATFORM|PRODUCT)_" > $TMPDIR/branding.sh
+    . $TMPDIR/branding.sh
+
+    sed -i \
+        -e "s,@@TIMESTAMP@@,$(date +%s.00)," \
+        -e "s,@@PLATFORM_NAME@@,$PLATFORM_NAME," \
+        -e "s,@@PLATFORM_VERSION@@,$PLATFORM_VERSION," \
+        -e "s,@@PRODUCT_BRAND@@,$PRODUCT_BRAND," \
+        -e "s,@@PRODUCT_VERSION@@,$PRODUCT_VERSION," \
+        $ISODIR/.treeinfo
+
     mkdir ${VERBOSE} "$ISODIR/Packages"
 
     get_rpms --depends "$ISODIR/Packages" xcp-ng-deps kernel-alt
@@ -240,9 +240,8 @@ if [ $DOREPO = 1 ]; then
             $ISODIR/boot/isolinux/isolinux.cfg \
             $ISODIR/EFI/xenserver/grub*.cfg
     fi
-else
-    # no repo
-    # FIXME: should be generated above instead?
+else # no repo
+    # remove unused template
     rm ${VERBOSE} "$ISODIR/.treeinfo"
 
     # trigger netinstall mode
