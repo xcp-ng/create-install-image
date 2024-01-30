@@ -70,6 +70,23 @@ This scripts excludes from the mirror:
 - development RPMs
 - debugging-symbols RPMs
 
+Repositories to mirror can be specified in 2 ways:
+
+* a XCP-ng version identifier: the relevant subdirectory of
+  https://updates.xcp-ng.org/ will be mirrored under a subdirectory of
+  the target directory named after the version.  Eg. this will
+  synchronize the official XCP-ng distribution site to
+  `~/mirrors/xcpng/8.3/`:
+  ```
+  ./scripts/mirror-repos.sh 8.3 ~/mirrors/xcpng/
+  ```
+* a URL to a browsable directory: the whole tree behind this directory
+  will be mirrored under a subdirectory of the target directory named
+  after the version.  Eg. the above is equivalent to:
+  ```
+  ./scripts/mirror-repos.sh https://updates.xcp-ng.org/8/8.3 ~/mirrors/xcpng/
+  ```
+
 > [!NOTE]
 >
 > this includes much more packages (order of a few gigabytes) than
