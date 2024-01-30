@@ -69,6 +69,8 @@ This scripts excludes from the mirror:
 - source RPMs
 - development RPMs
 - debugging-symbols RPMs
+- a few large RPMs only useful as build dependencies: ocaml, golang,
+  java
 
 Repositories to mirror can be specified in 2 ways:
 

@@ -26,5 +26,5 @@ command -v lftp >/dev/null || die "required tool not found: lftp"
 lftp -c mirror \
      --verbose \
      --delete \
-     --exclude="/Source/|-debuginfo-|-devel[-_]" \
+     --exclude="/Source/|-debuginfo-|-devel[-_]|/xs-opam-repo|/ocaml|/golang|/java" \
      "$SRCURL" "$TARGET"
