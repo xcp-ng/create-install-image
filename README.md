@@ -29,7 +29,7 @@ sudo yum install -y --enablerepo=epel gnupg1
 
 The sequence of steps is:
 - `mirror`: (optionally) create a (partial) *local mirror* from
-  *source repos*, using [`mirror-repos.sh`](#scriptscreate-install-isosh)
+  *source repos*, using [`mirror-repos.sh`](#scriptscreate-isosh)
 - `installimg`: create *installer root filesystem* from the *local
   mirror* or from *source repos*, using
   [`./scripts/create-installimg.sh`](#scriptscreate-installimgsh)
@@ -40,7 +40,7 @@ The sequence of steps is:
 
 All script have a `--help` documenting all their options.
 
-### `./scripts/create-install-iso.sh`
+### `./scripts/create-iso.sh`
 
 Creates `.iso` from:
 - `install.img` (see below)
@@ -50,7 +50,7 @@ Creates `.iso` from:
 
 ### `./scripts/create-installimg.sh`
 
-Creates `install-$RELEASE.img` for input to `create-install-iso`, from:
+Creates `install-$RELEASE.img` for input to `create-iso`, from:
 - yum repository for the product (or a local mirror)
 - a `packages.lst` file listing RPMs to be installed
 - additional files from `./installimg/$RELEASE/`
@@ -159,7 +159,7 @@ sudo ./scripts/create-installimg.sh \
     --output install-8.3.testing.img \
     8.3:testing
 
-./scripts/create-install-iso.sh \
+./scripts/create-iso.sh \
     --srcurl file://$HOME/mirrors/xcpng/8.3 \
     --output xcp-ng-8.3.testing.iso \
     -V "XCP-NG_830_TEST" \
@@ -176,7 +176,7 @@ sudo ./scripts/create-installimg.sh \
     --output install-8.2.updates.img \
     8.2:updates
 
-./scripts/create-install-iso.sh \
+./scripts/create-iso.sh \
     --srcurl file://$HOME/mirrors/xcpng/8.2 \
     --output xcp-ng-8.2.updates.iso \
     -V "XCP-NG_82_TEST" \
