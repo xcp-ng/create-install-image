@@ -34,7 +34,9 @@ The sequence of steps is:
   mirror* or from *source repos*, using
   [`./scripts/create-installimg.sh`](#scriptscreate-installimgsh)
 - `iso`: create XCP-ng *installation ISO*, from *installer root
-  filesystem*, and from *local mirror* or *source repos*
+  filesystem*, from *local mirror* or *source repos*, and (optionally)
+  from a *signing script*, using
+  [`./scripts/create-iso.sh`](#scriptscreate-isosh)
 
 ## Individual scripts
 
@@ -47,6 +49,30 @@ Creates `.iso` from:
 - yum repository for the product (or a local mirror) for boot files and
   local repository
 - additional files from `./iso/$RELEASE/`
+- optional signing script
+
+When generating a full image (as opposed to a netinstall one), the yum
+repository included in the ISO can optionally be signed.  Since the
+signing key is precious and secret material, it is advised not to be
+stored on a development machine.  To perform the signing operation,
+you have to provide an executable script which will take as parameter
+the path to the directory with which contents the ISO will be built.
+
+The script must:
+- sign the `repomd.xml` yum repository metadata index using a gpg1
+  detached ascii/armor signature
+- export the public key usable for signature verification to a
+  `RPM-GPG-KEY-*` file at the root of the ISO directory
+- set the `[keys]key1` field in `.treeinfo` at the root of the ISO
+  directory to name the file created at previous step containing the
+  public key
+
+> [!NOTE]
+>
+> The `scripts/sample-sign-script.sh` example script is only suitable
+> for playing with a test key.  A safer solution would for example
+> request signature from a signature server, prompting you for an OTP
+> token to make sure you're entitled to use the service.
 
 ### `./scripts/create-installimg.sh`
 

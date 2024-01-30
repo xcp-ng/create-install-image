@@ -24,7 +24,7 @@ Options:
                               rpm: take prebuilt xenserver/grubx64.efi from rpm
                               mkimage: call mkimage to generate an EFI binary
     --netinstall              do not include repository in ISO
-    --sign <NICK> <KEYID>     sign repomd with default gpg key <KEYID>, with readable <NICK>
+    --sign-script <SCRIPT>    sign repomd using <SCRIPT>
     --force-overwrite         don't abort if output file already exists
     --verbose                 be talkative
 EOF
@@ -34,8 +34,7 @@ VERBOSE=
 OUTISO=
 FORCE_OVERWRITE=0
 DOREPO=1
-KEYID=
-KEYNICK=
+SIGNSCRIPT=
 SRCURL=
 declare -A CUSTOM_REPOS=()
 RPMARCH="x86_64"
@@ -92,11 +91,10 @@ while [ $# -ge 1 ]; do
             esac
             shift
             ;;
-        --sign)
-            [ $# -ge 3 ] || die_usage "$1 needs 2 arguments"
-            KEYNICK="$2"
-            KEYID="$3"
-            shift 2
+        --sign-script)
+            [ $# -ge 2 ] || die_usage "$1 needs an argument"
+            SIGNSCRIPT="$2"
+            shift
             ;;
         -*)
             die_usage "unknown flag '$1'"
@@ -116,8 +114,8 @@ if [ "$FORCE_OVERWRITE" = 0 -a -e "$OUTISO" ]; then
 fi
 [ ! -d "$OUTISO" ] || die "'$OUTISO' exists and is a directory"
 
-if [ $DOREPO = 0 -a -n "$KEYID" ]; then
-    die_usage "signing key is useless on netinstall media"
+if [ $DOREPO = 0 -a -n "$SIGNSCRIPT" ]; then
+    die_usage "signing script is useless on netinstall media"
 fi
 
 parse_config_search_path "$1"
@@ -132,7 +130,6 @@ test -r "$INSTALLIMG" || die "cannot read '$INSTALLIMG' for install.img"
 command -v genisoimage >/dev/null || die "required tool not found: genisoimage"
 command -v isohybrid >/dev/null || die "required tool not found: isohybrid (syslinux)"
 command -v createrepo_c >/dev/null || die "required tool not found: createrepo_c"
-[ -z "$KEYID" ] || command -v gpg1 >/dev/null || die "required tool not found: gpg1 (gnupg1)"
 
 MKIMAGE=$(command -v grub2-mkimage || command -v grub-mkimage) || die "could not find grub[2]-mkimage"
 if [[ "$($MKIMAGE --version)" =~ ".*2.02" ]]; then
@@ -237,12 +234,8 @@ if [ $DOREPO = 1 ]; then
     get_rpms --depends "$ISODIR/Packages" xcp-ng-deps kernel-alt
 
     createrepo_c ${VERBOSE} "$ISODIR"
-    if [ -n "$KEYID" ]; then
-        gpg1 ${VERBOSE} --default-key="$KEYID" --armor --detach-sign "$ISODIR/repodata/repomd.xml"
-        gpg1 ${VERBOSE} --armor -o "$ISODIR/RPM-GPG-KEY-$KEYNICK" --export "$KEYID"
-        [ -z "$VERBOSE" ] || echo "using key RPM-GPG-KEY-$KEYNICK in .treeinfo"
-        sed -i "s,key1 = .*,key1 = RPM-GPG-KEY-$KEYNICK," \
-            $ISODIR/.treeinfo
+    if [ -n "$SIGNSCRIPT" ]; then
+        "$SIGNSCRIPT" "$ISODIR"
     else
         # installer checks if keys are here even when verification is disabled
         [ -z "$VERBOSE" ] || echo "disabling keys in .treeinfo"
