@@ -137,6 +137,19 @@ used:
   additional base repo layers.  The `base` layer will always be in the
   include chain.
 
+Other recognized config files:
+
+* All layers may provide `installer-bootargs.lst`, whose contents will
+  be added as installer's dom0 boot parameters.  This is notably
+  useful for downstream users to pass `no-gpgcheck` using their own
+  layer when building a 8.3 ISO, so they can sign their repo metadata
+  with their own key without getting `gpgcheck` refuse to install RPMs
+  signed by XCP-ng key.  `repo-gpgcheck` is already effective to
+  verify the repo metadata so `gpgcheck` does no provide any real
+  value here.  In 8.2 however this option does not exist (only the
+  answerfile allows to disable gpg checking, and does not separate
+  checking RPMs from repodata).
+
 XCP-ng official repositories are located at
 https://updates.xcp-ng.org/ and most of them are available through
 standard "repo" layers; e.g. the `testing` repository for `8.2` LTS can

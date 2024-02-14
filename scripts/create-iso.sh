@@ -201,11 +201,20 @@ mv ${VERBOSE} $ISODIR/usr/src/branding/* $ISODIR/
 (cd $ISODIR && rmdir -p usr/src/branding/)
 
 
+# linux boot options
+
 sed_bootloader_configs() {
     sed -i "$@" \
         $ISODIR/boot/isolinux/isolinux.cfg \
         $ISODIR/*/*/grub*.cfg
 }
+
+EXTRABOOTPARAMS=$(find_all_configs installer-bootargs.lst | xargs --no-run-if-empty cat)
+if [ -n "${EXTRABOOTPARAMS}" ]; then
+    sed_bootloader_configs \
+        -e "s|/vmlinuz|/vmlinuz ${EXTRABOOTPARAMS}|"
+fi
+
 
 # optional local repo
 
