@@ -201,6 +201,12 @@ mv ${VERBOSE} $ISODIR/usr/src/branding/* $ISODIR/
 (cd $ISODIR && rmdir -p usr/src/branding/)
 
 
+sed_bootloader_configs() {
+    sed -i "$@" \
+        $ISODIR/boot/isolinux/isolinux.cfg \
+        $ISODIR/*/*/grub*.cfg
+}
+
 # optional local repo
 
 if [ $DOREPO = 1 ]; then
@@ -236,18 +242,16 @@ if [ $DOREPO = 1 ]; then
 
         # don't try to validate repo sig if we put none
         [ -z "$VERBOSE" ] || echo "adding no-repo-gpgcheck to boot/isolinux/isolinux.cfg EFI/xenserver/grub*.cfg"
-        sed -i "s,/vmlinuz,/vmlinuz no-repo-gpgcheck," \
-            $ISODIR/boot/isolinux/isolinux.cfg \
-            $ISODIR/EFI/xenserver/grub*.cfg
+        sed_bootloader_configs \
+            -e "s,/vmlinuz,/vmlinuz no-repo-gpgcheck,"
     fi
 else # no repo
     # remove unused template
     rm ${VERBOSE} "$ISODIR/.treeinfo"
 
     # trigger netinstall mode
-    sed -i -e "s@/vmlinuz@/vmlinuz netinstall@" \
-        "$ISODIR"/*/*/grub*.cfg \
-        "$ISODIR"/boot/isolinux/isolinux.cfg
+    sed_bootloader_configs \
+        -e "s@/vmlinuz@/vmlinuz netinstall@"
 fi
 
 
