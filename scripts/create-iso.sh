@@ -24,7 +24,7 @@ Options:
                               rpm: take prebuilt xenserver/grubx64.efi from rpm
                               mkimage: call mkimage to generate an EFI binary
     --netinstall              do not include repository in ISO
-    --sign <NICK> <KEYID>     sign repomd with default gpg key <KEYID>, with readable <NICK>
+    --sign-script <SCRIPT>    sign repomd using <SCRIPT>
     --force-overwrite         don't abort if output file already exists
     --verbose                 be talkative
 EOF
@@ -34,8 +34,7 @@ VERBOSE=
 OUTISO=
 FORCE_OVERWRITE=0
 DOREPO=1
-KEYID=
-KEYNICK=
+SIGNSCRIPT=
 SRCURL=
 declare -A CUSTOM_REPOS=()
 RPMARCH="x86_64"
@@ -92,11 +91,10 @@ while [ $# -ge 1 ]; do
             esac
             shift
             ;;
-        --sign)
-            [ $# -ge 3 ] || die_usage "$1 needs 2 arguments"
-            KEYNICK="$2"
-            KEYID="$3"
-            shift 2
+        --sign-script)
+            [ $# -ge 2 ] || die_usage "$1 needs an argument"
+            SIGNSCRIPT="$2"
+            shift
             ;;
         -*)
             die_usage "unknown flag '$1'"
@@ -116,8 +114,8 @@ if [ "$FORCE_OVERWRITE" = 0 -a -e "$OUTISO" ]; then
 fi
 [ ! -d "$OUTISO" ] || die "'$OUTISO' exists and is a directory"
 
-if [ $DOREPO = 0 -a -n "$KEYID" ]; then
-    die_usage "signing key is useless on netinstall media"
+if [ $DOREPO = 0 -a -n "$SIGNSCRIPT" ]; then
+    die_usage "signing script is useless on netinstall media"
 fi
 
 parse_config_search_path "$1"
@@ -132,7 +130,6 @@ test -r "$INSTALLIMG" || die "cannot read '$INSTALLIMG' for install.img"
 command -v genisoimage >/dev/null || die "required tool not found: genisoimage"
 command -v isohybrid >/dev/null || die "required tool not found: isohybrid (syslinux)"
 command -v createrepo_c >/dev/null || die "required tool not found: createrepo_c"
-[ -z "$KEYID" ] || command -v gpg1 >/dev/null || die "required tool not found: gpg1 (gnupg1)"
 
 MKIMAGE=$(command -v grub2-mkimage || command -v grub-mkimage) || die "could not find grub[2]-mkimage"
 if [[ "$($MKIMAGE --version)" =~ ".*2.02" ]]; then
@@ -193,7 +190,7 @@ if [ ! -r $ISODIR/boot/memtest.bin ]; then
     mv ${VERBOSE} $ISODIR/boot/memtest86+-* $ISODIR/boot/memtest.bin
 fi
 
-# branding
+# branding: EULA, LICENSES
 get_rpms "$SCRATCHDIR" branding-xcp-ng
 rpm2cpio $SCRATCHDIR/branding-xcp-ng-*.rpm |
     (cd $ISODIR && cpio ${VERBOSE} -idm ./usr/src/branding/EULA ./usr/src/branding/LICENSES)
@@ -201,33 +198,44 @@ mv ${VERBOSE} $ISODIR/usr/src/branding/* $ISODIR/
 (cd $ISODIR && rmdir -p usr/src/branding/)
 
 
+# linux boot options
+
+sed_bootloader_configs() {
+    sed -i "$@" \
+        $ISODIR/boot/isolinux/isolinux.cfg \
+        $ISODIR/*/*/grub*.cfg
+}
+
+EXTRABOOTPARAMS=$(find_all_configs installer-bootargs.lst | xargs --no-run-if-empty cat)
+if [ -n "${EXTRABOOTPARAMS}" ]; then
+    sed_bootloader_configs \
+        -e "s|/vmlinuz|/vmlinuz ${EXTRABOOTPARAMS}|"
+fi
+
+
 # optional local repo
 
-rpm2cpio $SCRATCHDIR/branding-xcp-ng-*.rpm |
-    (cd $ISODIR && cpio ${VERBOSE} -i --to-stdout ./usr/src/branding/branding) |
-    grep -E "^(PLATFORM|PRODUCT)_" > $TMPDIR/branding.sh
-. $TMPDIR/branding.sh
-
-sed -i \
-    -e "s,@@TIMESTAMP@@,$(date +%s.00)," \
-    -e "s,@@PLATFORM_NAME@@,$PLATFORM_NAME," \
-    -e "s,@@PLATFORM_VERSION@@,$PLATFORM_VERSION," \
-    -e "s,@@PRODUCT_BRAND@@,$PRODUCT_BRAND," \
-    -e "s,@@PRODUCT_VERSION@@,$PRODUCT_VERSION," \
-    $ISODIR/.treeinfo
-
 if [ $DOREPO = 1 ]; then
+    rpm2cpio $SCRATCHDIR/branding-xcp-ng-*.rpm |
+        (cd $ISODIR && cpio ${VERBOSE} -i --to-stdout ./usr/src/branding/branding) |
+        grep -E "^(PLATFORM|PRODUCT)_" > $TMPDIR/branding.sh
+    . $TMPDIR/branding.sh
+
+    sed -i \
+        -e "s,@@TIMESTAMP@@,$(date +%s.00)," \
+        -e "s,@@PLATFORM_NAME@@,$PLATFORM_NAME," \
+        -e "s,@@PLATFORM_VERSION@@,$PLATFORM_VERSION," \
+        -e "s,@@PRODUCT_BRAND@@,$PRODUCT_BRAND," \
+        -e "s,@@PRODUCT_VERSION@@,$PRODUCT_VERSION," \
+        $ISODIR/.treeinfo
+
     mkdir ${VERBOSE} "$ISODIR/Packages"
 
     get_rpms --depends "$ISODIR/Packages" xcp-ng-deps kernel-alt
 
     createrepo_c ${VERBOSE} "$ISODIR"
-    if [ -n "$KEYID" ]; then
-        gpg1 ${VERBOSE} --default-key="$KEYID" --armor --detach-sign "$ISODIR/repodata/repomd.xml"
-        gpg1 ${VERBOSE} --armor -o "$ISODIR/RPM-GPG-KEY-$KEYNICK" --export "$KEYID"
-        [ -z "$VERBOSE" ] || echo "using key RPM-GPG-KEY-$KEYNICK in .treeinfo"
-        sed -i "s,key1 = .*,key1 = RPM-GPG-KEY-$KEYNICK," \
-            $ISODIR/.treeinfo
+    if [ -n "$SIGNSCRIPT" ]; then
+        "$SIGNSCRIPT" "$ISODIR"
     else
         # installer checks if keys are here even when verification is disabled
         [ -z "$VERBOSE" ] || echo "disabling keys in .treeinfo"
@@ -236,19 +244,16 @@ if [ $DOREPO = 1 ]; then
 
         # don't try to validate repo sig if we put none
         [ -z "$VERBOSE" ] || echo "adding no-repo-gpgcheck to boot/isolinux/isolinux.cfg EFI/xenserver/grub*.cfg"
-        sed -i "s,/vmlinuz,/vmlinuz no-repo-gpgcheck," \
-            $ISODIR/boot/isolinux/isolinux.cfg \
-            $ISODIR/EFI/xenserver/grub*.cfg
+        sed_bootloader_configs \
+            -e "s,/vmlinuz,/vmlinuz no-repo-gpgcheck,"
     fi
-else
-    # no repo
-    # FIXME: should be generated above instead?
+else # no repo
+    # remove unused template
     rm ${VERBOSE} "$ISODIR/.treeinfo"
 
     # trigger netinstall mode
-    sed -i -e "s@/vmlinuz@/vmlinuz netinstall@" \
-        "$ISODIR"/*/*/grub*.cfg \
-        "$ISODIR"/boot/isolinux/isolinux.cfg
+    sed_bootloader_configs \
+        -e "s@/vmlinuz@/vmlinuz netinstall@"
 fi
 
 

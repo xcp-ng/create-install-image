@@ -34,7 +34,7 @@ test_expect_success EXPENSIVE "build install.img for 8.2:testing" "
 test_expect_success "build ISO for 8.2:testing" "
     ( test -r install-8.2-x86_64.img || touch install-8.2-x86_64.img ) &&
 
-    $TOPDIR/scripts/create-install-iso.sh \
+    $TOPDIR/scripts/create-iso.sh \
         --srcurl $XCPTEST_REPOROOT/8.2 \
         -V 'XCP-NG_TEST' \
         -o xcp-ng-8.2-install.iso \

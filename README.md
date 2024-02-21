@@ -25,22 +25,58 @@ sudo yum install -y genisoimage syslinux grub-tools createrepo_c libfaketime
 sudo yum install -y --enablerepo=epel gnupg1
 ```
 
+## Overview of the generation process
 
-## individual scripts
+The sequence of steps is:
+- `mirror`: (optionally) create a (partial) *local mirror* from
+  *source repos*, using [`mirror-repos.sh`](#scriptscreate-isosh)
+- `installimg`: create *installer root filesystem* from the *local
+  mirror* or from *source repos*, using
+  [`./scripts/create-installimg.sh`](#scriptscreate-installimgsh)
+- `iso`: create XCP-ng *installation ISO*, from *installer root
+  filesystem*, from *local mirror* or *source repos*, and (optionally)
+  from a *signing script*, using
+  [`./scripts/create-iso.sh`](#scriptscreate-isosh)
+
+## Individual scripts
 
 All script have a `--help` documenting all their options.
 
-### `./scripts/create-install-iso.sh`
+### `./scripts/create-iso.sh`
 
 Creates `.iso` from:
 - `install.img` (see below)
 - yum repository for the product (or a local mirror) for boot files and
   local repository
 - additional files from `./iso/$RELEASE/`
+- optional signing script
+
+When generating a full image (as opposed to a netinstall one), the yum
+repository included in the ISO can optionally be signed.  Since the
+signing key is precious and secret material, it is advised not to be
+stored on a development machine.  To perform the signing operation,
+you have to provide an executable script which will take as parameter
+the path to the directory with which contents the ISO will be built.
+
+The script must:
+- sign the `repomd.xml` yum repository metadata index using a gpg1
+  detached ascii/armor signature
+- export the public key usable for signature verification to a
+  `RPM-GPG-KEY-*` file at the root of the ISO directory
+- set the `[keys]key1` field in `.treeinfo` at the root of the ISO
+  directory to name the file created at previous step containing the
+  public key
+
+> [!NOTE]
+>
+> The `scripts/sample-sign-script.sh` example script is only suitable
+> for playing with a test key.  A safer solution would for example
+> request signature from a signature server, prompting you for an OTP
+> token to make sure you're entitled to use the service.
 
 ### `./scripts/create-installimg.sh`
 
-Creates `install-$RELEASE.img` for input to `create-install-iso`, from:
+Creates `install-$RELEASE.img` for input to `create-iso`, from:
 - yum repository for the product (or a local mirror)
 - a `packages.lst` file listing RPMs to be installed
 - additional files from `./installimg/$RELEASE/`
@@ -59,15 +95,55 @@ This scripts excludes from the mirror:
 - source RPMs
 - development RPMs
 - debugging-symbols RPMs
+- a few large RPMs only useful as build dependencies: ocaml, golang,
+  java
 
-:warning: If the script fails with the error message `"Cannot assign requested address"`,
-you need to configure `lftp` DNS resolution order to first look for IPv4
-addresses by adding this line to `~/.lftprc`:
-```
-set dns:order "inet inet6"
-```
+Repositories to mirror can be specified in 2 ways:
 
-## configuration layers and package repositories
+* a XCP-ng version identifier: the relevant subdirectory of
+  https://updates.xcp-ng.org/ will be mirrored under a subdirectory of
+  the target directory named after the version.  Eg. this will
+  synchronize the official XCP-ng distribution site to
+  `~/mirrors/xcpng/8.3/`:
+  ```
+  ./scripts/mirror-repos.sh 8.3 ~/mirrors/xcpng/
+  ```
+* a URL to a browsable directory: the whole tree behind this directory
+  will be mirrored under a subdirectory of the target directory named
+  after the version.  Eg. the above is equivalent to:
+  ```
+  ./scripts/mirror-repos.sh https://updates.xcp-ng.org/8/8.3 ~/mirrors/xcpng/
+  ```
+
+> [!NOTE]
+>
+> this includes much more packages (order of a few gigabytes) than
+> needed for producing the install ISO, notably build-dependencies
+> that are not needed by the installer, and not get installed
+> themselves on the XCP-ng host either.  But a local mirror which you
+> control will provide image reproducibility, through the ability to
+> work offline (including reproducibility when the *source repo*
+> changes between 2 runs, and consistency when it changes between the
+> `installimg` and `iso` steps).
+
+> [!NOTE]
+>
+> this is not a general-purpose mirroring tool.  It will notably not
+> mirror a number of development packages, which you would need to
+> build extra software or rebuild packages for XCP-ng.  If you need
+> more, use other tools like yum's `reposync` (which sadly we could
+> not build on, due to its complete lack of filtering features).
+
+> [!WARNING]
+>
+> If the script fails with the error message `"Cannot assign requested address"`,
+> you need to configure `lftp` DNS resolution order to first look for IPv4
+> addresses by adding this line to `~/.lftprc`:
+> ```
+> set dns:order "inet inet6"
+> ```
+
+## Configuration layers and package repositories
 
 Configuration layers are defined as a subdirectory of the `configs/`
 directory.  Commands are given a layer search path as
@@ -87,6 +163,19 @@ used:
   additional base repo layers.  The `base` layer will always be in the
   include chain.
 
+Other recognized config files:
+
+* All layers may provide `installer-bootargs.lst`, whose contents will
+  be added as installer's dom0 boot parameters.  This is notably
+  useful for downstream users to pass `no-gpgcheck` using their own
+  layer when building a 8.3 ISO, so they can sign their repo metadata
+  with their own key without getting `gpgcheck` refuse to install RPMs
+  signed by XCP-ng key.  `repo-gpgcheck` is already effective to
+  verify the repo metadata so `gpgcheck` does no provide any real
+  value here.  In 8.2 however this option does not exist (only the
+  answerfile allows to disable gpg checking, and does not separate
+  checking RPMs from repodata).
+
 XCP-ng official repositories are located at
 https://updates.xcp-ng.org/ and most of them are available through
 standard "repo" layers; e.g. the `testing` repository for `8.2` LTS can
@@ -97,7 +186,7 @@ used multiple times to define more than one custom repo).  They will
 be used by `yum` using the first `CUSTOMREPO.tmpl` template found in
 the layer search path (one is provided in `base`).
 
-## examples
+## Examples
 
 ### 8.3 updates and testing
 
@@ -109,7 +198,7 @@ sudo ./scripts/create-installimg.sh \
     --output install-8.3.testing.img \
     8.3:testing
 
-./scripts/create-install-iso.sh \
+./scripts/create-iso.sh \
     --srcurl file://$HOME/mirrors/xcpng/8.3 \
     --output xcp-ng-8.3.testing.iso \
     -V "XCP-NG_830_TEST" \
@@ -126,7 +215,7 @@ sudo ./scripts/create-installimg.sh \
     --output install-8.2.updates.img \
     8.2:updates
 
-./scripts/create-install-iso.sh \
+./scripts/create-iso.sh \
     --srcurl file://$HOME/mirrors/xcpng/8.2 \
     --output xcp-ng-8.2.updates.iso \
     -V "XCP-NG_82_TEST" \
@@ -170,7 +259,7 @@ reason still to be determined)
    -device usb-storage,bus=xhci.0,drive=stick
   ```
 
-## testing that scripts run correctly
+## Testing that scripts run correctly
 
 Minimal tests to generate install ISO for a few important
 configurations are available in `tests/`.  They require one-time
