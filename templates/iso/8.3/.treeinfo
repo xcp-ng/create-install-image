@@ -1,3 +1,11 @@
+[platform]
+name = @@PLATFORM_NAME@@
+version = @@PLATFORM_VERSION@@
+
+[branding]
+name = @@PRODUCT_BRAND@@
+version = @@PRODUCT_VERSION@@
+
 [system-v1]
 platform_name = @@PLATFORM_NAME@@
 platform_version = @@PLATFORM_VERSION@@
