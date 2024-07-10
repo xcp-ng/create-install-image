@@ -135,6 +135,7 @@ setup_yum_download() {
             -e "s,@@ENABLE_PLUGINS@@,$enable_plugins," \
             -e "s,@@YUMREPOSD@@,$YUMREPOSD," \
             -e "s,@@CACHEDIR@@,$TMPDIR/yum-cache," \
+            -e "s,@@RPMARCH@@,$RPMARCH," \
             > "$YUMDLCONF"
     mkdir ${VERBOSE} "$DUMMYROOT/etc"
     YUMDLFLAGS=(
