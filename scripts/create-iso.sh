@@ -1,5 +1,5 @@
 #! /bin/bash
-set -e
+set -eE
 set -o pipefail
 
 mydir=$(dirname $0)
