@@ -236,6 +236,11 @@ if [ $DOREPO = 1 ]; then
     createrepo_c ${VERBOSE} "$ISODIR"
     if [ -n "$SIGNSCRIPT" ]; then
         "$SIGNSCRIPT" "$ISODIR"
+        # Check that the digest is strong enough. Value 8 means SHA256.
+        # See https://www.rfc-editor.org/rfc/rfc4880#section-9.4
+        echo "Checking the strength of the signature (repodata/repomd.xml.asc)"
+        gpg --list-packets "$ISODIR"/repodata/repomd.xml.asc |
+            awk '/digest algo/ { if ($3 + 0 >= 8 && $3 + 0 <= 11) { print "Valid digest algorithm"; exit 0; } else { print "Invalid digest algorithm"; exit 1; } }'
     else
         # installer checks if keys are here even when verification is disabled
         [ -z "$VERBOSE" ] || echo "disabling keys in .treeinfo"
