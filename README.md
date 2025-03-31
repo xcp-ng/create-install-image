@@ -212,6 +212,36 @@ sudo ./scripts/create-installimg.sh \
     8.3:testing install-8.3.testing.img
 ```
 
+### 8.3 updates and linstor
+
+The standalone linstor ISO requires extra packages from a separate
+repository.
+
+```
+./scripts/mirror-repos.sh 8.3 ~/mirrors/xcpng
+./scripts/mirror-repos.sh https://repo.vates.tech/xcp-ng/8/8.3 ~/mirrors/xcpng-rvt/8.3
+
+sudo ./scripts/create-installimg.sh \
+    --srcurl file://$HOME/mirrors/xcpng/8.3 \
+    --output install-8.3.img \
+    8.3:updates
+
+./scripts/create-iso.sh \
+    --srcurl file://$HOME/mirrors/xcpng/8.3 \
+    --srcurl:linstor file://$HOME/mirrors/xcpng-rvt/8.3 \
+    --output xcp-ng-8.3.linstor.iso \
+    --extra-packages "xcp-ng-linstor" \
+    -V "XCP-NG_830_TEST" \
+    8.3:updates:linstor install-8.3.img
+```
+
+> [!NOTE]
+>
+> This example only pulls the latest version of the LINSTOR packages.
+> To be suitable for update of a LINSTOR-enabled XCP-ng 8.2.1, it must
+> *also* be provided with the version matching the 8.2.1 installation.
+
+
 ### tip of 8.2 (8.2 + updates)
 
 ```
