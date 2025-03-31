@@ -20,6 +20,8 @@ Options:
                               default: https://updates.xcp-ng.org/<MAJOR>/<DIST>
     -D|--define-repo <NICK>!<URL>
                               add yum repo with name <NICK> and base URL <URL>
+    --extra-packages "<PACKAGE> [<PACKAGE> ...]"
+                              include packages and their dependencies in repo
     --efi-installer <mode>    select how to build the GRUB EFI binary. Valid modes:
                               rpm: take prebuilt xenserver/grubx64.efi from rpm
                               mkimage: call mkimage to generate an EFI binary
@@ -36,6 +38,7 @@ FORCE_OVERWRITE=0
 DOREPO=1
 SIGNSCRIPT=
 SRCURL=
+EXTRA_PACKAGES=
 declare -A CUSTOM_REPOS=()
 RPMARCH="x86_64"
 EFIMODE="rpm"
@@ -81,6 +84,11 @@ while [ $# -ge 1 ]; do
                     ;;
             esac
             CUSTOM_REPOS["$nick"]="$url"
+            shift
+            ;;
+        --extra-packages)
+            [ $# -ge 2 ] || die_usage "$1 needs an argument"
+            EXTRA_PACKAGES="$2"
             shift
             ;;
         --efi-installer)
@@ -231,7 +239,7 @@ if [ $DOREPO = 1 ]; then
 
     mkdir ${VERBOSE} "$ISODIR/Packages"
 
-    get_rpms --depends "$ISODIR/Packages" xcp-ng-deps kernel-alt
+    get_rpms --depends "$ISODIR/Packages" xcp-ng-deps kernel-alt ${EXTRA_PACKAGES}
 
     createrepo_c ${VERBOSE} "$ISODIR"
     if [ -n "$SIGNSCRIPT" ]; then
