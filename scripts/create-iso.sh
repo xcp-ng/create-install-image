@@ -175,6 +175,8 @@ mkdir ${VERBOSE} $ISODIR/boot/alt
 mv ${VERBOSE} $ISODIR/boot/vmlinuz-* $ISODIR/boot/alt/vmlinuz
 
 # xen from rpm
+# Note: we use the debug version of the hypervisor (as does XenServer), to make it
+# possible to get a more useful `xl dmesg` if anything goes wrong.
 get_rpms "$SCRATCHDIR" xen-hypervisor
 rpm2cpio $SCRATCHDIR/xen-hypervisor-*.rpm | (cd $ISODIR && cpio ${VERBOSE} -idm "*xen*gz")
 mv ${VERBOSE} $ISODIR/boot/xen-*-d.gz $ISODIR/boot/xen.gz
