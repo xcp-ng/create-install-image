@@ -68,6 +68,8 @@ find_all_configs() {
 
 # default src URL depending on selected $DIST
 
+SRCURL=
+
 maybe_set_srcurl() {
     [ $# = 1 ] || die "maybe_set_srcurl: need exactly 1 argument"
     DIST="$1"
@@ -111,10 +113,9 @@ yumdl_is_dnf() {
 }
 
 setup_yum_download() {
-    [ $# = 3 ] || die "setup_yum_download: need exactly 3 arguments"
+    [ $# = 2 ] || die "setup_yum_download: need exactly 2 arguments"
     DIST="$1"
     RPMARCH="$2"
-    SRCURL="$3"
 
     YUMDLCONF_TMPL=$(find_config yumdl.conf.tmpl)
 

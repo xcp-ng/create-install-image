@@ -37,7 +37,6 @@ OUTISO=
 FORCE_OVERWRITE=0
 DOREPO=1
 SIGNSCRIPT=
-SRCURL=
 EXTRA_PACKAGES=
 declare -A CUSTOM_REPOS=()
 RPMARCH="x86_64"
@@ -156,7 +155,7 @@ ISODIR=$(mktemp -d "$TMPDIR/installiso.XXXXXX")
 # temporary for storing downloaded files etc
 SCRATCHDIR=$(mktemp -d "$TMPDIR/tmp.XXXXXX")
 
-setup_yum_download "$DIST" "$RPMARCH" "$SRCURL"
+setup_yum_download "$DIST" "$RPMARCH"
 
 
 ## put all bits together

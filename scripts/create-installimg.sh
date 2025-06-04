@@ -24,7 +24,6 @@ EOF
 VERBOSE=
 OUTPUT_IMG=
 FORCE_OVERWRITE=0
-SRCURL=
 declare -A CUSTOM_REPOS=()
 RPMARCH="x86_64"
 while [ $# -ge 1 ]; do
