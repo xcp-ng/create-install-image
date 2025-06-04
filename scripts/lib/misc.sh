@@ -69,6 +69,7 @@ find_all_configs() {
 # default src URL depending on selected $DIST
 
 SRCURL=
+declare -A SRCURLS=()
 
 maybe_set_srcurl() {
     [ $# = 1 ] || die "maybe_set_srcurl: need exactly 1 argument"
@@ -155,7 +156,7 @@ setup_yum_repos() {
         reponame=$(basename $(dirname "$YUMREPOSCONF_TMPL"))
         cat "$YUMREPOSCONF_TMPL" |
             sed \
-                -e "s,@@SRCURL@@,$SRCURL," \
+                -e "s,@@SRCURL@@,${SRCURLS[$reponame]:-$SRCURL}," \
                 -e "s,@@RPMARCH@@,$RPMARCH," \
                 > "$YUMREPOSD/$reponame.repo"
     done

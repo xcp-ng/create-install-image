@@ -18,6 +18,8 @@ Options:
     -V <VOLID>                (mandatory) ISO volume ID
     --srcurl <URL>            get RPMs from base-config and overlays from <URL>
                               default: https://updates.xcp-ng.org/<MAJOR>/<DIST>
+    --srcurl:<OVERLAY> <URL>  get RPMs for specified <OVERLAY> from <URL>
+                              default: the global <URL> controled by --srcurl
     -D|--define-repo <NICK>!<URL>
                               add yum repo with name <NICK> and base URL <URL>
     --extra-packages "<PACKAGE> [<PACKAGE> ...]"
@@ -69,6 +71,13 @@ while [ $# -ge 1 ]; do
         --srcurl)
             [ $# -ge 2 ] || die_usage "$1 needs an argument"
             SRCURL="$2"
+            shift
+            ;;
+        --srcurl:*)
+            [ $# -ge 2 ] || die_usage "$1 needs an argument"
+            OVL="${1#--srcurl:}"
+            [ -n "$OVL" -a -d "$topdir/configs/$OVL" ] || die_usage "$1 does not name an existing overlay"
+            SRCURLS["$OVL"]="$2"
             shift
             ;;
         -D|--define-repo)

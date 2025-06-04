@@ -167,8 +167,8 @@ used:
 Template files will be expanded by string substitution of
 `@@KEYWORD@@` patterns.  Some of them are for the scripts' internal
 use to fulfill tools requirements, a few of them are user-tunable,
-notably the `@@SRCURL@@` one, controlled by the `--srcurl`
-command-line flag.
+notably the `@@SRCURL@@` one, controlled by the `--srcurl` and
+`--srcurl:<overlay>` command-line flags.
 
 Other recognized config files:
 
