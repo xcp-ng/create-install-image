@@ -18,8 +18,12 @@ Options:
     -V <VOLID>                (mandatory) ISO volume ID
     --srcurl <URL>            get RPMs from base-config and overlays from <URL>
                               default: https://updates.xcp-ng.org/<MAJOR>/<DIST>
+    --srcurl:<OVERLAY> <URL>  get RPMs for specified <OVERLAY> from <URL>
+                              default: the global <URL> controled by --srcurl
     -D|--define-repo <NICK>!<URL>
                               add yum repo with name <NICK> and base URL <URL>
+    --extra-packages "<PACKAGE> [<PACKAGE> ...]"
+                              include packages and their dependencies in repo
     --efi-installer <mode>    select how to build the GRUB EFI binary. Valid modes:
                               rpm: take prebuilt xenserver/grubx64.efi from rpm
                               mkimage: call mkimage to generate an EFI binary
@@ -35,7 +39,7 @@ OUTISO=
 FORCE_OVERWRITE=0
 DOREPO=1
 SIGNSCRIPT=
-SRCURL=
+EXTRA_PACKAGES=
 declare -A CUSTOM_REPOS=()
 RPMARCH="x86_64"
 EFIMODE="rpm"
@@ -69,6 +73,13 @@ while [ $# -ge 1 ]; do
             SRCURL="$2"
             shift
             ;;
+        --srcurl:*)
+            [ $# -ge 2 ] || die_usage "$1 needs an argument"
+            OVL="${1#--srcurl:}"
+            [ -n "$OVL" -a -d "$topdir/configs/$OVL" ] || die_usage "$1 does not name an existing overlay"
+            SRCURLS["$OVL"]="$2"
+            shift
+            ;;
         -D|--define-repo)
             [ $# -ge 2 ] || die_usage "$1 needs an argument"
             case "$2" in
@@ -81,6 +92,11 @@ while [ $# -ge 1 ]; do
                     ;;
             esac
             CUSTOM_REPOS["$nick"]="$url"
+            shift
+            ;;
+        --extra-packages)
+            [ $# -ge 2 ] || die_usage "$1 needs an argument"
+            EXTRA_PACKAGES="$2"
             shift
             ;;
         --efi-installer)
@@ -148,7 +164,7 @@ ISODIR=$(mktemp -d "$TMPDIR/installiso.XXXXXX")
 # temporary for storing downloaded files etc
 SCRATCHDIR=$(mktemp -d "$TMPDIR/tmp.XXXXXX")
 
-setup_yum_download "$DIST" "$RPMARCH" "$SRCURL"
+setup_yum_download "$DIST" "$RPMARCH"
 
 
 ## put all bits together
@@ -233,7 +249,7 @@ if [ $DOREPO = 1 ]; then
 
     mkdir ${VERBOSE} "$ISODIR/Packages"
 
-    get_rpms --depends "$ISODIR/Packages" xcp-ng-deps kernel-alt
+    get_rpms --depends "$ISODIR/Packages" xcp-ng-deps kernel-alt ${EXTRA_PACKAGES}
 
     createrepo_c ${VERBOSE} "$ISODIR"
     if [ -n "$SIGNSCRIPT" ]; then

@@ -158,10 +158,17 @@ used:
   - `yumdl.conf.tmpl` used to download files for the RPM repository
     included in the ISO
 
-* The "repo" layers (e.g. `updates`) each provide a yum repo
-  configuration file, and optionally an `INCLUDE` file to pull
-  additional base repo layers.  The `base` layer will always be in the
-  include chain.
+* The "repo" layers (e.g. `updates`) each provide:
+  - `yum-repos.conf.tmpl`, a yum repo configuration template
+  - optional `INCLUDE` file to pull additional base repo layers.  The
+    `base` layer contains a few extra files, and needs always be in
+    the include chain.
+
+Template files will be expanded by string substitution of
+`@@KEYWORD@@` patterns.  Some of them are for the scripts' internal
+use to fulfill tools requirements, a few of them are user-tunable,
+notably the `@@SRCURL@@` one, controlled by the `--srcurl` and
+`--srcurl:<overlay>` command-line flags.
 
 Other recognized config files:
 
@@ -204,6 +211,36 @@ sudo ./scripts/create-installimg.sh \
     -V "XCP-NG_830_TEST" \
     8.3:testing install-8.3.testing.img
 ```
+
+### 8.3 updates and linstor
+
+The standalone linstor ISO requires extra packages from a separate
+repository.
+
+```
+./scripts/mirror-repos.sh 8.3 ~/mirrors/xcpng
+./scripts/mirror-repos.sh https://repo.vates.tech/xcp-ng/8/8.3 ~/mirrors/xcpng-rvt/8.3
+
+sudo ./scripts/create-installimg.sh \
+    --srcurl file://$HOME/mirrors/xcpng/8.3 \
+    --output install-8.3.img \
+    8.3:updates
+
+./scripts/create-iso.sh \
+    --srcurl file://$HOME/mirrors/xcpng/8.3 \
+    --srcurl:linstor file://$HOME/mirrors/xcpng-rvt/8.3 \
+    --output xcp-ng-8.3.linstor.iso \
+    --extra-packages "xcp-ng-linstor" \
+    -V "XCP-NG_830_TEST" \
+    8.3:updates:linstor install-8.3.img
+```
+
+> [!NOTE]
+>
+> This example only pulls the latest version of the LINSTOR packages.
+> To be suitable for update of a LINSTOR-enabled XCP-ng 8.2.1, it must
+> *also* be provided with the version matching the 8.2.1 installation.
+
 
 ### tip of 8.2 (8.2 + updates)
 
