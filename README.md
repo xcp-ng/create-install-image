@@ -230,7 +230,7 @@ sudo ./scripts/create-installimg.sh \
     --srcurl file://$HOME/mirrors/xcpng/8.3 \
     --srcurl:linstor file://$HOME/mirrors/xcpng-rvt/8.3 \
     --output xcp-ng-8.3.linstor.iso \
-    --extra-packages "xcp-ng-linstor" \
+    --extra-packages "xcp-ng-release-linstor xcp-ng-linstor" \
     -V "XCP-NG_830_TEST" \
     8.3:updates:linstor install-8.3.img
 ```
