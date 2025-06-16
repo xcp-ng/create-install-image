@@ -69,6 +69,14 @@ The script must:
 
 > [!NOTE]
 >
+> If one of the packages requested for shipping as part of the repo is
+> not available, a `No package <package-name> available.` message will
+> be next-to-visible in the non-verbose output.  Sadly `yumdownloader`
+> does not seem to provide a behaviour where it would fail if it
+> cannot do what we request from it.
+
+> [!NOTE]
+>
 > The `scripts/sample-sign-script.sh` example script is only suitable
 > for playing with a test key.  A safer solution would for example
 > request signature from a signature server, prompting you for an OTP
