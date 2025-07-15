@@ -129,6 +129,16 @@ YUMFLAGS=(
 )
 
 setup_yum_repos "${YUMFLAGS[@]}"
+[ -z "$VERBOSE" ] || { ls -al "$YUMREPOSD"; cat "$YUMREPOSD"/*; }
+
+# @core install is brittle, Alma10 core packages have to be installed
+# first, without any perturbations from xcp-ng-release
+PACKAGES0_LST=$(find_config packages-core.lst)
+sed "s/#.*//" < "$PACKAGES0_LST" |
+    xargs "$PKGTOOL" "${YUMFLAGS[@]}" install \
+        --disablerepo=* --enablerepo=alma-base \
+        --assumeyes \
+        --noplugins
 
 PACKAGES_LST=$(find_config packages.lst)
 sed "s/#.*//" < "$PACKAGES_LST" |
@@ -136,41 +146,41 @@ sed "s/#.*//" < "$PACKAGES_LST" |
         --assumeyes \
         --noplugins
 
-### removal of abusively-pulled packages (list manually extracted as
-### packages not in 8.2.1 install.img)
-
-rpm --root="$ROOTFS" --nodeps --erase \
-    binutils dracut gpg-pubkey pkgconfig xen-hypervisor
-
-
-### removal of misc stuff
-
-# > 100KB
-BINS="systemd-analyze systemd-nspawn journalctl machinectl dgawk loginctl ssh-keyscan pgawk busctl systemd-run"
-BINS+=" ssh-agent timedatectl systemd-cgls localectl hostnamectl systemd-inhibit info oldfind coredumpctl"
-SBINS="pdata_tools oxenstored ldconfig build-locale-archive glibc_post_upgrade.x86_64 sln install-info"
-MOREFILES=" \
-        /boot \
-        /usr/share/locale /usr/lib/locale /usr/share/i18n/locales \
-        /usr/libexec/xen/boot \
-        /usr/share/bash-completion \
-"
-
-# FIXME decide what to do with those doubtbul ones:
-
-# if we want to use craklib why remove this, if we don't why not remove the rest
-MOREFILES+=" /usr/share/cracklib"
-# similarly, there are other files - maybe those are just the source file?
-MOREFILES+=" /usr/lib/udev/hwdb.d/"
-
-RMPATHS=$(
-    for i in $BINS; do echo $ROOTFS/usr/bin/$i; done
-    for i in $SBINS; do echo $ROOTFS/usr/sbin/$i; done
-    for i in $MOREFILES; do echo $ROOTFS/$i; done
-       )
-
-rm -r $VERBOSE $RMPATHS
-find $ROOTFS/usr -name "*.py[co]" -delete
+# ### removal of abusively-pulled packages (list manually extracted as
+# ### packages not in 8.2.1 install.img)
+# 
+# rpm --root="$ROOTFS" --nodeps --erase \
+#     binutils dracut gpg-pubkey pkgconfig xen-hypervisor
+# 
+# 
+# ### removal of misc stuff
+# 
+# # > 100KB
+# BINS="systemd-analyze systemd-nspawn journalctl machinectl dgawk loginctl ssh-keyscan pgawk busctl systemd-run"
+# BINS+=" ssh-agent timedatectl systemd-cgls localectl hostnamectl systemd-inhibit info oldfind coredumpctl"
+# SBINS="pdata_tools oxenstored ldconfig build-locale-archive glibc_post_upgrade.x86_64 sln install-info"
+# MOREFILES=" \
+#         /boot \
+#         /usr/share/locale /usr/lib/locale /usr/share/i18n/locales \
+#         /usr/libexec/xen/boot \
+#         /usr/share/bash-completion \
+# "
+# 
+# # FIXME decide what to do with those doubtbul ones:
+# 
+# # if we want to use craklib why remove this, if we don't why not remove the rest
+# MOREFILES+=" /usr/share/cracklib"
+# # similarly, there are other files - maybe those are just the source file?
+# MOREFILES+=" /usr/lib/udev/hwdb.d/"
+# 
+# RMPATHS=$(
+#     for i in $BINS; do echo $ROOTFS/usr/bin/$i; done
+#     for i in $SBINS; do echo $ROOTFS/usr/sbin/$i; done
+#     for i in $MOREFILES; do echo $ROOTFS/$i; done
+#        )
+# 
+# rm -r $VERBOSE $RMPATHS
+# find $ROOTFS/usr -name "*.py[co]" -delete
 
 
 ### extra stuff

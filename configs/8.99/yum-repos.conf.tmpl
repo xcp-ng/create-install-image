@@ -1,0 +1,33 @@
+[alma-base]
+name=AlmaLinux - CoreOS
+baseurl=https://repo.almalinux.org/almalinux/10.0/BaseOS/@@RPMARCH@@/os
+gpgkey=https://repo.almalinux.org/almalinux/10.0/BaseOS/@@RPMARCH@@/os/RPM-GPG-KEY-AlmaLinux-10
+failovermethod=priority
+skip_if_unavailable=False
+
+[appstream]
+name=AlmaLinux 10 - AppStream
+mirrorlist=https://mirrors.almalinux.org/mirrorlist/10.0/appstream?arch=x86_64_v2
+enabled=1
+gpgcheck=1
+countme=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-AlmaLinux-10
+metadata_expire=86400
+enabled_metadata=1
+
+[epel]
+name=Extra Packages for Enterprise Linux 10 from AlmaLinux
+baseurl=https://epel.repo.almalinux.org/10.0/@@RPMARCH@@/
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-AlmaLinux-10-EPEL-AltArch
+gpgcheck=1
+repo_gpgcheck=0
+metadata_expire=24h
+
+[xcpng]
+name=xcpng
+baseurl=http://repos/repos/ydi/v9alma10v2/
+gpgkey=https://xcp-ng.org/RPM-GPG-KEY-xcpng
+failovermethod=priority
+skip_if_unavailable=False
+# nothing signed yet
+gpgcheck=0
