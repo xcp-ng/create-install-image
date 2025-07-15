@@ -13,6 +13,7 @@ Usage: $0 [<options>] <base-config>[:<config-overlay>]*
 
 Options:
     --srcurl <URL>            get RPMs from repo at <URL>
+    --arch <ARCH>             RPM archivecture to build for (default: x86_64)
     -D|--define-repo <NICK>!<URL>
                               add yum repo with name <NICK> and base URL <URL>
     --output|-o <OUTPUT.IMG>  choose a different output name
@@ -34,6 +35,11 @@ while [ $# -ge 1 ]; do
             ;;
         --verbose|-v)
             VERBOSE=-v
+            ;;
+        --arch)
+            [ $# -ge 2 ] || die_usage "$1 needs an argument"
+            RPMARCH="$2"
+            shift
             ;;
         --srcurl)
             [ $# -ge 2 ] || die_usage "$1 needs an argument"
