@@ -118,6 +118,8 @@ yumdl_is_dnf() {
     fi
 }
 
+! yumdl_is_dnf || die "this 'yum' is a wrapper around 'dnf', maybe you meat '--pkgtool dnf'"
+
 setup_yum_download() {
     [ $# = 2 ] || die "setup_yum_download: need exactly 2 arguments"
     DIST="$1"
@@ -130,12 +132,16 @@ setup_yum_download() {
     YUMLOGDIR=$(mktemp -d "$TMPDIR/logs-XXXXXX")
     DUMMYROOT=$(mktemp -d "$TMPDIR/root-XXXXXX")
 
-    # if yumdl_is_dnf; then
-    #     enable_plugins=1
-    #     echo >&2 "WARNING: yumdownloader is dnf wrapper, I have to enable dnf plugins!"
-    # else
-    enable_plugins=0
-    # fi
+    case "$PKGTOOL" in
+        dnf)
+            enable_plugins=1
+            echo >&2 "WARNING: dnf download is a plugin, I have to enable dnf plugins!"
+            ;;
+        yum)
+            enable_plugins=0
+            ;;
+        *) die "unsupported pkgtool '$PKGTOOL'" ;;
+    esac
 
     cat "$YUMDLCONF_TMPL" |
         sed \
