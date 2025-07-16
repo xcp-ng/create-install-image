@@ -118,7 +118,9 @@ yumdl_is_dnf() {
     fi
 }
 
-! yumdl_is_dnf || die "this 'yum' is a wrapper around 'dnf', maybe you meat '--pkgtool dnf'"
+if [ "$PKGTOOL" = "yum" ] && yumdl_is_dnf; then
+    die "this 'yum' is a wrapper around 'dnf', maybe you meat '--pkgtool dnf'"
+fi
 
 setup_yum_download() {
     [ $# = 2 ] || die "setup_yum_download: need exactly 2 arguments"
