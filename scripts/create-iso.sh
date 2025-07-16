@@ -21,6 +21,7 @@ Options:
     --srcurl:<OVERLAY> <URL>  get RPMs for specified <OVERLAY> from <URL>
                               default: the global <URL> controled by --srcurl
     --arch <ARCH>             RPM archivecture to build for (default: x86_64)
+    --pkgtool dnf             use DNF instead of YUM
     -D|--define-repo <NICK>!<URL>
                               add yum repo with name <NICK> and base URL <URL>
     --extra-packages "<PACKAGE> [<PACKAGE> ...]"
@@ -41,6 +42,7 @@ FORCE_OVERWRITE=0
 DOREPO=1
 SIGNSCRIPT=
 EXTRA_PACKAGES=
+PKGTOOL=yum
 declare -A CUSTOM_REPOS=()
 RPMARCH="x86_64"
 EFIMODE="rpm"
@@ -118,6 +120,11 @@ while [ $# -ge 1 ]; do
             SIGNSCRIPT="$2"
             shift
             ;;
+        --pkgtool)
+            [ $# -ge 2 ] || die_usage "$1 needs an argument"
+            PKGTOOL="$2"
+            shift
+            ;;
         -*)
             die_usage "unknown flag '$1'"
             ;;
@@ -164,6 +171,12 @@ else
     echo 2>&1 "WARNING: tool not found, disabling support: faketime (libfaketime)"
     FAKETIME=()
 fi
+
+case "$PKGTOOL" in
+    yum) DLTOOL=(yumdownloader) ;;
+    dnf) DLTOOL=(dnf download) ;;
+    *) die "unsupported pkgtool '$PKGTOOL'" ;;
+esac
 
 ISODIR=$(mktemp -d "$TMPDIR/installiso.XXXXXX")
 
