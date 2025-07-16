@@ -149,7 +149,7 @@ command -v createrepo_c >/dev/null || die "required tool not found: createrepo_c
 
 MKIMAGE=$(command -v grub2-mkimage || command -v grub-mkimage) || die "could not find grub[2]-mkimage"
 if [[ "$($MKIMAGE --version)" =~ ".*2.02" ]]; then
-    die "$MKIMAGE is too old, make sure to have 2.06 installed (XCP-ng package grub-tools)"
+    die "$MKIMAGE is too old, make sure to have 2.06 installed (XCP-ng package grub2-tools or grub-tools)"
 fi
 
 if command -v faketime >/dev/null; then

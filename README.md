@@ -21,9 +21,18 @@ XCP-ng versions.
 They require to install some additional packages first:
 
 ```
-sudo yum install -y genisoimage syslinux grub-tools createrepo_c libfaketime
+sudo yum install -y genisoimage syslinux grub2-tools createrepo_c libfaketime
 sudo yum install -y --enablerepo=epel gnupg1
 ```
+
+> [!NOTE]
+>
+> For 8.x, install `grub-tools` rather than `grub2-tools`
+
+> [!NOTE]
+>
+> For now `libfaketime` is not available in Alma10 (but it is in 10-kitten),
+> problematic for repro but not critical
 
 ## Overview of the generation process
 
