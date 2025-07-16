@@ -20,6 +20,7 @@ Options:
                               default: https://updates.xcp-ng.org/<MAJOR>/<DIST>
     --srcurl:<OVERLAY> <URL>  get RPMs for specified <OVERLAY> from <URL>
                               default: the global <URL> controled by --srcurl
+    --arch <ARCH>             RPM archivecture to build for (default: x86_64)
     -D|--define-repo <NICK>!<URL>
                               add yum repo with name <NICK> and base URL <URL>
     --extra-packages "<PACKAGE> [<PACKAGE> ...]"
@@ -51,6 +52,11 @@ while [ $# -ge 1 ]; do
             ;;
         --verbose|-v)
             VERBOSE=-v
+            ;;
+        --arch)
+            [ $# -ge 2 ] || die_usage "$1 needs an argument"
+            RPMARCH="$2"
+            shift
             ;;
         --output|-o)
             [ $# -ge 2 ] || die_usage "$1 needs an argument"
