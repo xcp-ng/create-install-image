@@ -196,8 +196,8 @@ for version in $(cd "$ROOTFS/lib/modules" && ls); do
     /sbin/depmod -a --config "$ROOTFS/etc/depmod.d/" --basedir "$ROOTFS" "$version"
 done
 
-# FIXME ignored
-: > $ROOTFS/etc/yum/yum.conf
+# # FIXME ignored
+# : > $ROOTFS/etc/yum/yum.conf
 
 # installer branding - FIXME should be part of host-installer.rpm
 ln -s ../../../EULA "$ROOTFS/opt/xensource/installer/"

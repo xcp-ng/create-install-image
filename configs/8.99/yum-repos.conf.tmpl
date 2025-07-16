@@ -1,23 +1,31 @@
 [alma-base]
 name=AlmaLinux - CoreOS
-baseurl=https://repo.almalinux.org/almalinux/10.0/BaseOS/@@RPMARCH@@/os
+mirrorlist=https://mirrors.almalinux.org/mirrorlist/10.0/baseos?arch=@@RPMARCH@@
+#baseurl=https://repo.almalinux.org/almalinux/10.0/BaseOS/@@RPMARCH@@/os
 gpgkey=https://repo.almalinux.org/almalinux/10.0/BaseOS/@@RPMARCH@@/os/RPM-GPG-KEY-AlmaLinux-10
 failovermethod=priority
 skip_if_unavailable=False
 
+# devel is required for libyajl.so.2 in yajl, Alma devs notified
+[alma10-devel]
+name=Almalinux 10 devel
+mirrorlist=https://mirrors.almalinux.org/mirrorlist/10.0/devel?arch=@@RPMARCH@@
+#baseurl=https://repo.almalinux.org/almalinux/10.0/devel/@@RPMARCH@@/os/
+gpgcheck=1
+
 [appstream]
 name=AlmaLinux 10 - AppStream
-mirrorlist=https://mirrors.almalinux.org/mirrorlist/10.0/appstream?arch=x86_64_v2
-enabled=1
+mirrorlist=https://mirrors.almalinux.org/mirrorlist/10.0/appstream?arch=@@RPMARCH@@
 gpgcheck=1
-countme=1
 gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-AlmaLinux-10
 metadata_expire=86400
 enabled_metadata=1
 
+# FIXME: this URL is only for Alma archs not in RHEL, ie. x86_64_v2
+# we need some packages shipped in 10.1 but not 10.0
 [epel]
-name=Extra Packages for Enterprise Linux 10 from AlmaLinux
-baseurl=https://epel.repo.almalinux.org/10.0/@@RPMARCH@@/
+name=Extra Packages for Enterprise Linux 10.1 from AlmaLinux
+baseurl=https://epel.repo.almalinux.org/10.1/@@RPMARCH@@/
 gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-AlmaLinux-10-EPEL-AltArch
 gpgcheck=1
 repo_gpgcheck=0

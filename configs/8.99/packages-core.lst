@@ -1,54 +1,52 @@
-@core
-# ## mandatory packages from @core, filtered:
-#    audit
-#    basesystem
-# # installing first
-# #   bash
-#    coreutils
-#    cronie
-# # this fails to install "failed to exec scriptlet interpreter /bin/sh: No such file or directory"
-# #   crypto-policies
-# #   crypto-policies-scripts
-#    curl
-#    dnf
-#    e2fsprogs
-#    filesystem
-#    firewalld
-#    glibc
-#    grubby
-#    hostname
-#    iproute
-#    iproute-tc
-#    iputils
-#    irqbalance
-#    kbd
-# # hu, no
-# #   kexec-tools
-#    less
-#    logrotate
-#    man-db
-#    ncurses
-#    openssh-clients
-#    openssh-server
-#    p11-kit
-#    parted
-#    policycoreutils
-#    procps-ng
-#    rootfiles
-#    rpm
-#    rpm-plugin-audit
-#    rsyslog
-#    selinux-policy-targeted
-#    setup
-#    shadow-utils
-#    sssd-common
-#    sssd-kcm
-#    sudo
-#    systemd
-#    util-linux
-#    vim-minimal
-# # hu, no
-# #   xfsprogs
-# # c'mon, rly?
-# #   yum
-# #
+## mandatory packages from @core, filtered:
+   audit
+   basesystem
+   bash
+   coreutils
+   cronie
+# what is this, pulled as dep anyway
+#   crypto-policies
+# what is this
+#   crypto-policies-scripts
+   curl
+   dnf
+   e2fsprogs
+   filesystem
+   firewalld
+   glibc
+   grubby
+   hostname
+   iproute
+   iproute-tc
+   iputils
+   irqbalance
+   kbd
+# hu, no
+#   kexec-tools
+   less
+   logrotate
+   man-db
+   ncurses
+   openssh-clients
+   openssh-server
+   p11-kit
+   parted
+   policycoreutils
+   procps-ng
+   rootfiles
+   rpm
+   rpm-plugin-audit
+   selinux-policy-targeted
+   setup
+   shadow-utils
+   sssd-common
+   sssd-kcm
+   sudo
+   systemd
+   util-linux
+   vim-minimal
+# hu, no
+#   xfsprogs
+# c'mon, rly?
+#   yum
+#

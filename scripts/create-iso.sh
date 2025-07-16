@@ -197,10 +197,17 @@ tar -C "$topdir/templates/iso/$DIST" -cf - . | tar -C "$ISODIR/" -xf - ${VERBOSE
 cp ${VERBOSE} -a "$INSTALLIMG" $ISODIR/install.img
 
 # kernel from rpm
-get_rpms "$SCRATCHDIR" kernel
-rpm2cpio $SCRATCHDIR/kernel-*.rpm | (cd $ISODIR && cpio ${VERBOSE} -idm "*vmlinuz*")
-rm ${VERBOSE} $ISODIR/boot/vmlinuz-*-xen
-mv ${VERBOSE} $ISODIR/boot/vmlinuz-* $ISODIR/boot/vmlinuz
+if get_rpms "$SCRATCHDIR" kernel-core; then
+    kpkg=kernel-core
+    kdir=./lib/modules/*
+else
+    get_rpms "$SCRATCHDIR" kernel
+    kpkg=kernel
+    kdir=./boot
+fi
+rpm2cpio $SCRATCHDIR/$kpkg-*.rpm | (cd $ISODIR && cpio ${VERBOSE} -idm "$kdir/vmlinuz*")
+[ "$kpkg" = "kernel-core" ] || rm ${VERBOSE} $ISODIR/boot/vmlinuz-*-xen
+mv ${VERBOSE} $ISODIR/$kdir/vmlinuz* $ISODIR/boot/vmlinuz
 
 # alt kernel from rpm
 get_rpms "$SCRATCHDIR" kernel-alt
@@ -218,14 +225,14 @@ mv ${VERBOSE} $ISODIR/boot/xen-*-d.gz $ISODIR/boot/xen.gz
 rm ${VERBOSE} $ISODIR/boot/xen-*.gz
 
 
-# Memtest86
-get_rpms "$SCRATCHDIR" memtest86+
-rpm2cpio $SCRATCHDIR/memtest86+-*.rpm | (cd $ISODIR && cpio ${VERBOSE} -idm "./boot/*")
-if [ ! -r $ISODIR/boot/memtest.bin ]; then
-    # older 5.x packaging
-    rm ${VERBOSE} $ISODIR/boot/elf-memtest86+-*
-    mv ${VERBOSE} $ISODIR/boot/memtest86+-* $ISODIR/boot/memtest.bin
-fi
+# # Memtest86
+# get_rpms "$SCRATCHDIR" memtest86+
+# rpm2cpio $SCRATCHDIR/memtest86+-*.rpm | (cd $ISODIR && cpio ${VERBOSE} -idm "./boot/*")
+# if [ ! -r $ISODIR/boot/memtest.bin ]; then
+#     # older 5.x packaging
+#     rm ${VERBOSE} $ISODIR/boot/elf-memtest86+-*
+#     mv ${VERBOSE} $ISODIR/boot/memtest86+-* $ISODIR/boot/memtest.bin
+# fi
 
 # branding: EULA, LICENSES
 get_rpms "$SCRATCHDIR" branding-xcp-ng
