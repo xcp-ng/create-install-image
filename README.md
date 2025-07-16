@@ -278,9 +278,9 @@ sudo ./scripts/create-installimg.sh \
     8.99
 
 ./scripts/create-iso.sh \
-    --srcurl http://repos/repos/ydi/v9alma10v2/ \
+    --arch x86_64_v2 \
     --output xcp-ng-8.99.updates.iso \
-    -V "XCP-NG_82_TEST" \
+    -V "XCP-NG_899_TEST" \
     8.99 install-8.99.img
 ```
 
