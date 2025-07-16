@@ -279,6 +279,7 @@ sudo ./scripts/create-installimg.sh \
 
 ./scripts/create-iso.sh \
     --arch x86_64_v2 \
+    --pkgtool dnf \
     --output xcp-ng-8.99.updates.iso \
     -V "XCP-NG_899_TEST" \
     8.99 install-8.99.img
