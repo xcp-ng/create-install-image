@@ -145,6 +145,7 @@ setup_yum_download() {
             -e "s,@@CACHEDIR@@,$TMPDIR/yum-cache," \
             -e "s,@@RPMARCH@@,$RPMARCH," \
             > "$YUMDLCONF"
+    [ -z "$VERBOSE" ] || cat "$YUMDLCONF"
     mkdir ${VERBOSE} "$DUMMYROOT/etc"
     YUMDLFLAGS=(
         # non-$VERBOSE is -q, $VERBOSE is default, yum's -v would be debug
