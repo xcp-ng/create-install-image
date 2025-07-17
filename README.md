@@ -69,6 +69,14 @@ The script must:
 
 > [!NOTE]
 >
+> If one of the packages requested for shipping as part of the repo is
+> not available, a `No package <package-name> available.` message will
+> be next-to-visible in the non-verbose output.  Sadly `yumdownloader`
+> does not seem to provide a behaviour where it would fail if it
+> cannot do what we request from it.
+
+> [!NOTE]
+>
 > The `scripts/sample-sign-script.sh` example script is only suitable
 > for playing with a test key.  A safer solution would for example
 > request signature from a signature server, prompting you for an OTP
@@ -230,7 +238,7 @@ sudo ./scripts/create-installimg.sh \
     --srcurl file://$HOME/mirrors/xcpng/8.3 \
     --srcurl:linstor file://$HOME/mirrors/xcpng-rvt/8.3 \
     --output xcp-ng-8.3.linstor.iso \
-    --extra-packages "xcp-ng-linstor" \
+    --extra-packages "xcp-ng-release-linstor xcp-ng-linstor" \
     -V "XCP-NG_830_TEST" \
     8.3:updates:linstor install-8.3.img
 ```
