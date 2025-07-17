@@ -168,22 +168,27 @@ sed "s/#.*//" < "$PACKAGES_LST" |
 #         /usr/libexec/xen/boot \
 #         /usr/share/bash-completion \
 # "
-# 
-# # FIXME decide what to do with those doubtbul ones:
-# 
-# # if we want to use craklib why remove this, if we don't why not remove the rest
-# MOREFILES+=" /usr/share/cracklib"
-# # similarly, there are other files - maybe those are just the source file?
-# MOREFILES+=" /usr/lib/udev/hwdb.d/"
-# 
-# RMPATHS=$(
-#     for i in $BINS; do echo $ROOTFS/usr/bin/$i; done
-#     for i in $SBINS; do echo $ROOTFS/usr/sbin/$i; done
-#     for i in $MOREFILES; do echo $ROOTFS/$i; done
-#        )
-# 
-# rm -r $VERBOSE $RMPATHS
-# find $ROOTFS/usr -name "*.py[co]" -delete
+
+# package initscripts-rename-device cannot be removed
+MOREFILES=" \
+            /usr/lib/udev/rules.d/60-net.rules \
+"
+
+# FIXME decide what to do with those doubtbul ones:
+
+# if we want to use craklib why remove this, if we don't why not remove the rest
+MOREFILES+=" /usr/share/cracklib"
+# similarly, there are other files - maybe those are just the source file?
+MOREFILES+=" /usr/lib/udev/hwdb.d/"
+
+RMPATHS=$(
+    for i in $BINS; do echo $ROOTFS/usr/bin/$i; done
+    for i in $SBINS; do echo $ROOTFS/usr/sbin/$i; done
+    for i in $MOREFILES; do echo $ROOTFS/$i; done
+       )
+
+rm -r $VERBOSE $RMPATHS
+find $ROOTFS/usr -name "*.py[co]" -delete
 
 
 ### extra stuff
@@ -204,7 +209,7 @@ done
 
 # installer branding - FIXME should be part of host-installer.rpm
 ln -s ../../../EULA "$ROOTFS/opt/xensource/installer/"
-ln -s ../../../usr/lib/python2.7/site-packages/xcp/branding.py \
+ln -s ../../../usr/lib/python3.12/site-packages/xcp/branding.py \
            "$ROOTFS/opt/xensource/installer/version.py"
 
 

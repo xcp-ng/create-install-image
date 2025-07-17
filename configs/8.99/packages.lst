@@ -1,1 +1,9 @@
+# The Thing
 host-installer-startup
+# drivers for both kernels
+kernel-alt
+kernel-modules
+# ease of debugging
+bash-completion
+pciutils
+usbutils
