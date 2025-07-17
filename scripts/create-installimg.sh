@@ -140,6 +140,9 @@ sed "s/#.*//" < "$PACKAGES0_LST" |
         --assumeyes \
         --noplugins
 
+# WIP disable password
+sed -i 's/^root:.*$/root::::::::/' "$ROOTFS"/etc/shadow
+
 PACKAGES_LST=$(find_config packages.lst)
 sed "s/#.*//" < "$PACKAGES_LST" |
     xargs "$PKGTOOL" "${YUMFLAGS[@]}" install \
