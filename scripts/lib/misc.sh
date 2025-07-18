@@ -93,8 +93,11 @@ maybe_set_srcurl() {
 CLEANUP_DIRS=()
 CLEANUP_FILES=()
 exitcleanup() {
+    local exitcode=$?
     rm -rf "${CLEANUP_DIRS[@]}"
     rm -f "${CLEANUP_FILES[@]}"
+
+    [ $exitcode = 0 ] || echo >&2 "An ERROR happenned"
 }
 trap 'exitcleanup' EXIT INT
 
