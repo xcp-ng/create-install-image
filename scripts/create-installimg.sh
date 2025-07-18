@@ -140,6 +140,9 @@ sed "s/#.*//" < "$PACKAGES0_LST" |
         --assumeyes \
         --noplugins
 
+# now pull our replacements such as xcp-ng-release
+"$PKGTOOL" "${YUMFLAGS[@]}" --assumeyes upgrade
+
 # WIP disable password
 sed -i 's/^root:.*$/root::::::::/' "$ROOTFS"/etc/shadow
 
