@@ -6,6 +6,7 @@ After=systemd-udev-settle.service interface-rename-sideway.service getty@tty2.se
 [Service]
 Type=forking
 SendSIGHUP=yes
+ExecStartPre=printf '\033%%G' > /dev/tty0
 ExecStart=/opt/xensource/installer/preinit --
 
 [Install]
