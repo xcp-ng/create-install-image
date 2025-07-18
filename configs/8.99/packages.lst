@@ -10,5 +10,6 @@ kernel-alt
 kernel-modules
 ## ease of debugging
 bash-completion
+netcat
 pciutils
 usbutils
