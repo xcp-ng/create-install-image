@@ -140,6 +140,15 @@ sed "s/#.*//" < "$PACKAGES0_LST" |
         --assumeyes \
         --noplugins
 
+# epel-release must be configured before we can install from there
+"$PKGTOOL" "${YUMFLAGS[@]}" --assumeyes install epel-release \
+           --disablerepo=* --enablerepo=alma-extras
+
+# for some reason this is not done by just installing epel-release
+rpm \
+    --root "$ROOTFS" \
+    --import "$ROOTFS"/etc/pki/rpm-gpg/RPM-GPG-KEY-AlmaLinux-10-EPEL-AltArch
+
 # now pull our replacements such as xcp-ng-release
 "$PKGTOOL" "${YUMFLAGS[@]}" --assumeyes upgrade
 
@@ -172,9 +181,7 @@ sed "s/#.*//" < "$PACKAGES_LST" |
 #         /usr/share/bash-completion \
 # "
 
-# package initscripts-rename-device cannot be removed
 MOREFILES=" \
-            /usr/lib/udev/rules.d/60-net.rules \
 "
 
 # FIXME decide what to do with those doubtbul ones:

@@ -1,7 +1,7 @@
 [Unit]
 Description=XCP-ng Installer
-Requires=systemd-udev-settle.service interface-rename-sideway.service
-After=systemd-udev-settle.service interface-rename-sideway.service getty@tty2.service
+Requires=systemd-udev-settle.service
+After=systemd-udev-settle.service getty@tty2.service
 
 [Service]
 Type=forking
