@@ -6,7 +6,6 @@ After=systemd-udev-settle.service getty@tty2.service
 [Service]
 Type=forking
 SendSIGHUP=yes
-ExecStartPre=printf '\033%%G' > /dev/tty0
 ExecStart=/opt/xensource/installer/preinit --
 
 [Install]
