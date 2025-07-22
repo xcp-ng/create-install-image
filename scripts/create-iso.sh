@@ -277,7 +277,7 @@ if [ $DOREPO = 1 ]; then
 
     get_rpms --depends "$ISODIR/Packages" xcp-ng-deps kernel-alt ${EXTRA_PACKAGES}
 
-    createrepo_c ${VERBOSE} "$ISODIR"
+    createrepo_c ${VERBOSE} --compatibility "$ISODIR"
     if [ -n "$SIGNSCRIPT" ]; then
         "$SIGNSCRIPT" "$ISODIR"
         # Check that the digest is strong enough. Value 8 means SHA256.
