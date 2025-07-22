@@ -4,6 +4,8 @@
    bash
    coreutils
    cronie
+# explicit -noanacron or else -anacron gets pulled
+   cronie-noanacron
 # what is this, pulled as dep anyway
 #   crypto-policies
 # what is this

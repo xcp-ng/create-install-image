@@ -1,6 +1,7 @@
 ## The Thing
 host-installer-startup
 ## FIXME Missing deps
+chrony
 # to be evaluated
 dhcp-client
 # installer preinit needs xl
