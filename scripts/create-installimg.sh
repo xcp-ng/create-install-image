@@ -26,6 +26,7 @@ EOF
 VERBOSE=
 OUTPUT_IMG=
 FORCE_OVERWRITE=0
+ZSTD_FORCE=
 PKGTOOL=yum
 declare -A CUSTOM_REPOS=()
 RPMARCH="x86_64"
@@ -69,6 +70,7 @@ while [ $# -ge 1 ]; do
             ;;
         --force-overwrite)
             FORCE_OVERWRITE=1
+            ZSTD_FORCE=--force
             ;;
         --pkgtool)
             [ $# -ge 2 ] || die_usage "$1 needs an argument"
@@ -243,14 +245,13 @@ systemctl --root=$ROOTFS disable \
 rm -rf $ROOTFS/var/lib/yum/{yumdb,history} $ROOTFS/var/cache/yum
 
 ### repack cache into .img
-# make sure bzip2 doesn't leave an invalid output if its input command fails
+# FIXME make sure zstd doesn't leave an invalid output if its input command fails
 trap "rm -f $OUTPUT_IMG" ERR
-# FIXME replace bzip with better algo
 (
     set -o pipefail
     cd "$ROOTFS"
     find . | cpio -o -H newc
-) | bzip2 > "$OUTPUT_IMG"
+) | zstd $ZSTD_FORCE -o "$OUTPUT_IMG"
 
 # Local Variables:
 # indent-tabs-mode: nil
