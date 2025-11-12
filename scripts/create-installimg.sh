@@ -13,6 +13,8 @@ Usage: $0 [<options>] <base-config>[:<config-overlay>]*
 
 Options:
     --srcurl <URL>            get RPMs from repo at <URL>
+    --srcurl:<OVERLAY> <URL>  get RPMs for specified <OVERLAY> from <URL>
+                              default: the global <URL> controled by --srcurl
     -D|--define-repo <NICK>!<URL>
                               add yum repo with name <NICK> and base URL <URL>
     --output|-o <OUTPUT.IMG>  choose a different output name
@@ -38,6 +40,13 @@ while [ $# -ge 1 ]; do
         --srcurl)
             [ $# -ge 2 ] || die_usage "$1 needs an argument"
             SRCURL="$2"
+            shift
+            ;;
+        --srcurl:*)
+            [ $# -ge 2 ] || die_usage "$1 needs an argument"
+            OVL="${1#--srcurl:}"
+            [ -n "$OVL" -a -d "$topdir/configs/$OVL" ] || die_usage "$1 does not name an existing overlay"
+            SRCURLS["$OVL"]="$2"
             shift
             ;;
         -D|--define-repo)
