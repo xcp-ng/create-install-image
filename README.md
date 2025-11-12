@@ -270,19 +270,29 @@ sudo ./scripts/create-installimg.sh \
 
 ### 9.0 proto
 
-```
-sudo ./scripts/create-installimg.sh \
-    --arch x86_64_v2 \
-    --pkgtool dnf \
-    --output install-8.99.img \
-    8.99
+The following commands take care of launching in the proper container
+with all the necessary tools pre-installed.
 
-./scripts/create-iso.sh \
-    --arch x86_64_v2 \
-    --pkgtool dnf \
-    --output xcp-ng-8.99.iso \
-    -V "XCP-NG_899_TEST" \
-    8.99 install-8.99.img
+```
+xcp-ng-dev container run --dir=. \
+    --install=kmod \
+    9.0 -- \
+    sudo /external/create-install-image/scripts/create-installimg.sh \
+        --arch x86_64_v2 \
+        --pkgtool dnf \
+        --output /external/create-install-image/install-8.99.img \
+        8.99
+
+xcp-ng-dev container run --dir=. \
+    --install=genisoimage --install=syslinux --install=grub2-tools \
+    --install=createrepo_c --install=libfaketime \
+    9.0 -- \
+    /external/create-install-image/scripts/create-iso.sh \
+        --arch x86_64_v2 \
+        --pkgtool dnf \
+        --output /external/create-install-image/xcp-ng-8.99.iso \
+        -V "XCP-NG_899_TEST" \
+        8.99 /external/create-install-image/install-8.99.img
 ```
 
 ### testing boot modes in qemu
