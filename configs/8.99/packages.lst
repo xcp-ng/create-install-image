@@ -7,7 +7,7 @@ dhcp-client
 # installer preinit needs xl
 xen-dom0-tools
 ## drivers for both kernels
-kernel-alt
+#kernel-alt
 kernel-modules
 ## ease of debugging
 bash-completion
