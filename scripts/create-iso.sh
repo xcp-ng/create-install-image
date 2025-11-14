@@ -208,12 +208,20 @@ rpm2cpio $SCRATCHDIR/$kpkg-*.rpm | (cd $ISODIR && cpio ${VERBOSE} -idm "$kdir/vm
 [ "$kpkg" = "kernel-core" ] || rm ${VERBOSE} $ISODIR/boot/vmlinuz-*-xen
 mv ${VERBOSE} $ISODIR/$kdir/vmlinuz* $ISODIR/boot/vmlinuz
 
-# alt kernel from rpm
-get_rpms "$SCRATCHDIR" kernel-alt
-rpm2cpio $SCRATCHDIR/kernel-alt-*.rpm | (cd $ISODIR && cpio ${VERBOSE} -idm "*vmlinuz*")
-rm ${VERBOSE} $ISODIR/boot/vmlinuz-*-xen
-mkdir ${VERBOSE} $ISODIR/boot/alt
-mv ${VERBOSE} $ISODIR/boot/vmlinuz-* $ISODIR/boot/alt/vmlinuz
+altkernelfile=$(find_config ALTKERNEL)
+ALTKERNEL=
+if [ -s "$altkernelfile" ]; then
+    ALTKERNEL=$(cat "$altkernelfile")
+fi
+
+if [ -n "$ALTKERNEL" ]; then
+    # alt kernel from rpm
+    get_rpms "$SCRATCHDIR" "$ALTKERNEL"
+    rpm2cpio $SCRATCHDIR/"$ALTKERNEL"-*.rpm | (cd $ISODIR && cpio ${VERBOSE} -idm "*vmlinuz*")
+    rm ${VERBOSE} $ISODIR/boot/vmlinuz-*-xen
+    mkdir ${VERBOSE} $ISODIR/boot/alt
+    mv ${VERBOSE} $ISODIR/boot/vmlinuz-* $ISODIR/boot/alt/vmlinuz
+fi
 
 # xen from rpm
 # Note: we use the debug version of the hypervisor (as does XenServer), to make it
@@ -274,7 +282,7 @@ if [ $DOREPO = 1 ]; then
 
     mkdir ${VERBOSE} "$ISODIR/Packages"
 
-    get_rpms --depends "$ISODIR/Packages" xcp-ng-deps kernel-alt ${EXTRA_PACKAGES}
+    get_rpms --depends "$ISODIR/Packages" xcp-ng-deps ${ALTKERNEL} ${EXTRA_PACKAGES}
 
     createrepo_c ${VERBOSE} --compatibility "$ISODIR"
     if [ -n "$SIGNSCRIPT" ]; then

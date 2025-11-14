@@ -195,6 +195,11 @@ Other recognized config files:
   answerfile allows to disable gpg checking, and does not separate
   checking RPMs from repodata).
 
+* All layers may also provide an `ALTKERNEL` file, naming a alternate
+  kernel choice for booting the ISO.  The `base` layer sets this to
+  `kernel-alt`, an empty file will cause to alternate kernel to be
+  available.
+
 XCP-ng official repositories are located at
 https://updates.xcp-ng.org/ and most of them are available through
 standard "repo" layers; e.g. the `testing` repository for `8.2` LTS can
