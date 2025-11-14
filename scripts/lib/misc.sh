@@ -71,22 +71,6 @@ find_all_configs() {
 SRCURL=
 declare -A SRCURLS=()
 
-maybe_set_srcurl() {
-    [ $# = 1 ] || die "maybe_set_srcurl: need exactly 1 argument"
-    DIST="$1"
-    MINOR=${DIST%.*}
-    MAJOR=${MINOR%.*}
-    if [ "$MAJOR" = "$MINOR" ]; then
-	# DIST only has 2 components
-	MINOR="$DIST"
-    fi
-    SRCURL_DEFAULT="https://updates.xcp-ng.org/$MAJOR/$MINOR"
-    if [ -z "$SRCURL" ]; then
-	SRCURL="$SRCURL_DEFAULT"
-	[ -z "$VERBOSE" ] || echo "Defaulting to SRCURL '$SRCURL'"
-    fi
-}
-
 
 # cleanup tempfiles on exit
 

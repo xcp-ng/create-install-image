@@ -102,7 +102,6 @@ DIST="$(basename ${CFG_SEARCH_PATH[0]})"
 
 [ -z "$VERBOSE" ] || set -x
 
-maybe_set_srcurl "$DIST"
 [ -n "$OUTPUT_IMG" ] || die_usage "output filename must be specified (--output)"
 if [ "$FORCE_OVERWRITE" = 0 -a -e "$OUTPUT_IMG" ]; then
     die "'$OUTPUT_IMG' exists, use --force-overwrite to proceed regardless"

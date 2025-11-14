@@ -170,7 +170,7 @@ used:
 * The "repo" layers (e.g. `updates`) each provide:
   - `yum-repos.conf.tmpl`, a yum repo configuration template
   - optional `DEFAULT_SRCURL` file, whose content will provide a
-    default value for `--srcurl:<overlay>` (see below)
+    default value for `--srcurl:<overlay>` (see below).
   - optional `INCLUDE` file to pull additional base repo layers.  The
     `base` layer contains a few extra files, and needs always be in
     the include chain.
@@ -178,8 +178,9 @@ used:
 Template files will be expanded by string substitution of
 `@@KEYWORD@@` patterns.  Some of them are for the scripts' internal
 use to fulfill tools requirements, a few of them are user-tunable,
-notably the `@@SRCURL@@` one, controlled by the `--srcurl` and
-`--srcurl:<overlay>` command-line flags.
+notably the `@@SRCURL@@` one, controlled by the `DEFAULT_SRCURL` file
+and the `--srcurl` and `--srcurl:<overlay>` command-line flags, each
+one overriding the former.
 
 Other recognized config files:
 

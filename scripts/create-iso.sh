@@ -153,7 +153,6 @@ INSTALLIMG="$2"
 
 [ -z "$VERBOSE" ] || set -x
 
-maybe_set_srcurl "$DIST"
 test -r "$INSTALLIMG" || die "cannot read '$INSTALLIMG' for install.img"
 
 command -v genisoimage >/dev/null || die "required tool not found: genisoimage"
