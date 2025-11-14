@@ -172,13 +172,13 @@ setup_yum_repos() {
     find_all_configs yum-repos.conf.tmpl | while read YUMREPOSCONF_TMPL; do
         OVLDIR=$(dirname "$YUMREPOSCONF_TMPL")
         reponame=$(basename "$OVLDIR")
-        OVL_SRCURL=${SRCURLS[$reponame]}
+        OVL_SRCURL=${SRCURLS[$reponame]:-$SRCURL}
         if [ -z "$OVL_SRCURL" -a -e "$OVLDIR/DEFAULT_SRCURL" ]; then
             OVL_SRCURL=$(cat "$OVLDIR/DEFAULT_SRCURL")
         fi
         cat "$YUMREPOSCONF_TMPL" |
             sed \
-                -e "s,@@SRCURL@@,${OVL_SRCURL:-$SRCURL}," \
+                -e "s,@@SRCURL@@,${OVL_SRCURL}," \
                 -e "s,@@RPMARCH@@,$RPMARCH," \
                 > "$YUMREPOSD/$reponame.repo"
     done
