@@ -185,7 +185,7 @@ setup_yum_repos() {
     # FIXME: update for DNF?
     test ! -r /var/cache/yum/xcpng-base || die "yum system cache should not be there to start with"
     [ -z "$VERBOSE" ] || ls "$YUMREPOSD"
-    "$PKGTOOL" "$@" repolist all
+    "$PKGTOOL" "$@" repolist all --verbose
     # double-check we don't let yum reintroduce that cache by mistake
     test ! -r /var/cache/yum/xcpng-base || die "yum system cache should not have been created"
 }
