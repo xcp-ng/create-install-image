@@ -9,6 +9,8 @@ xen-dom0-tools
 ## drivers for both kernels
 #kernel-alt
 kernel-modules
+## hardware support
+iwlwifi-mvm-firmware
 ## ease of debugging
 bash-completion
 netcat
