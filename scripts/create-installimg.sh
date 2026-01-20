@@ -210,6 +210,37 @@ RMPATHS=$(
 rm -r $VERBOSE $RMPATHS
 find $ROOTFS/usr -name "*.py[co]" -delete
 
+### remove not-usable firmware files
+
+# This code in XS 8.4 was in trigger of host-installer.rpm tied to
+# linux-firmware.  But in Alma10 linux-firmware installs many files in
+# locations where the drivers cannot find them (so the original
+# triggers remove them) and other packages add symlinks that should
+# make them usable (except that those symlinks are now dangling).  We
+# cannot afford the space taken by unused firmware (initrd gets
+# impossible to load), so we adapted this job into this script, but
+# first replace the symlinks by hardlinks.
+#
+# FIXME: actually with `basename` used everywhere the symlinks have
+# little impact, the code issue was matching xz-compressed files,
+# and dealing with spaces in filenames.
+
+# # FIXME directory symlinks not handled
+# find "$ROOTFS"/lib/firmware/ -type l -exec bash -c 'ln -vf "$(readlink -m "$0")" "$0" '"$VERBOSE" {} \;
+
+FWUSED0=$(mktemp "$TMPDIR/firmware-used-XXXXXX")
+FWUSED=$(mktemp "$TMPDIR/firmware-used-XXXXXX")
+
+basename -a $(find "$ROOTFS"/lib/modules -type f \( -name '*.ko' -o -name '*.ko.xz' \) -print0 | xargs -0 modinfo --field firmware) > $FWUSED0
+sort -u < $FWUSED0 > $FWUSED
+find "$ROOTFS"/lib/firmware/ -type f | while read f; do
+   b="$(basename "$f" .xz)"
+   # keep files referenced by modinfo
+   grep -q "$b" $FWUSED && continue
+   # keep files referenced by modules
+   grep -qr "$b" /lib/modules && continue
+   rm $VERBOSE "$f"
+done
 
 ### extra stuff
 
@@ -250,7 +281,7 @@ systemctl --root=$ROOTFS disable \
            getty@tty1 fcoe lldpad xen-init-dom0 xenconsoled xenstored chronyd chrony-wait
 
 ### final cleanups
-rm -rf $ROOTFS/var/lib/yum/{yumdb,history} $ROOTFS/var/cache/yum
+rm -rf $ROOTFS/var/lib/yum/{yumdb,history} $ROOTFS/var/lib/dnf/ $ROOTFS/var/cache/{yum,dnf}
 
 ### repack cache into .img
 # FIXME make sure zstd doesn't leave an invalid output if its input command fails
