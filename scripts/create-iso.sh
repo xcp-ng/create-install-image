@@ -196,16 +196,11 @@ tar -C "$topdir/templates/iso/$DIST" -cf - . | tar -C "$ISODIR/" -xf - ${VERBOSE
 cp ${VERBOSE} -a "$INSTALLIMG" $ISODIR/install.img
 
 # kernel from rpm
-if get_rpms "$SCRATCHDIR" kernel-core; then
-    kpkg=kernel-core
-    kdir=./lib/modules/*
-else
-    get_rpms "$SCRATCHDIR" kernel
-    kpkg=kernel
-    kdir=./boot
-fi
+get_rpms "$SCRATCHDIR" kernel
+kpkg=kernel
+kdir=./boot
 rpm2cpio $SCRATCHDIR/$kpkg-*.rpm | (cd $ISODIR && cpio ${VERBOSE} -idm "$kdir/vmlinuz*")
-[ "$kpkg" = "kernel-core" ] || rm ${VERBOSE} $ISODIR/boot/vmlinuz-*-xen
+rm ${VERBOSE} $ISODIR/boot/vmlinuz-*-xen
 mv ${VERBOSE} $ISODIR/$kdir/vmlinuz* $ISODIR/boot/vmlinuz
 
 altkernelfile=$(find_config ALTKERNEL)

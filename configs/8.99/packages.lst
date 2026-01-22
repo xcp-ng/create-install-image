@@ -6,9 +6,8 @@ chrony
 dhcp-client
 # installer preinit needs xl
 xen-dom0-tools
-## drivers for both kernels
+## other kernels
 #kernel-alt
-kernel-modules
 ## hardware support
 iwlwifi-mvm-firmware
 ## ease of debugging
