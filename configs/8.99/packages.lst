@@ -10,7 +10,7 @@ xen-dom0-tools
 kernel
 #kernel-alt
 ## hardware support
-iwlwifi-mvm-firmware
+linux-firmware
 ## ease of debugging
 bash-completion
 netcat
