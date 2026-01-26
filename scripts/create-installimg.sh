@@ -141,6 +141,7 @@ YUMFLAGS=(
 setup_yum_repos "${YUMFLAGS[@]}"
 [ -z "$VERBOSE" ] || { ls -al "$YUMREPOSD"; cat "$YUMREPOSD"/*; }
 
+# FIXME this ought to disappear once xcp-ng-release get split
 # @core install is brittle, Alma10 core packages have to be installed
 # first, without any perturbations from xcp-ng-release
 PACKAGES0_LST=$(find_config packages-core.lst)
@@ -153,6 +154,7 @@ sed "s/#.*//" < "$PACKAGES0_LST" |
 # epel-release must be configured before we can install from there
 "$PKGTOOL" "${YUMFLAGS[@]}" --assumeyes install epel-release \
            --disablerepo=* --enablerepo=alma-extras
+# FIXME end
 
 # for some reason this is not done by just installing epel-release
 rpm \
