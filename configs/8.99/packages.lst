@@ -12,7 +12,6 @@ kernel
 ## hardware support
 linux-firmware
 ## ease of debugging
-bash-completion
 netcat
 pciutils
 usbutils
