@@ -5,7 +5,6 @@ baseurl=@@SRCURL@@/10.0/BaseOS/@@RPMARCH@@/os
 gpgkey=@@SRCURL@@/10.0/BaseOS/@@RPMARCH@@/os/RPM-GPG-KEY-AlmaLinux-10
 failovermethod=priority
 skip_if_unavailable=False
-enabled=1
 
 # extra is required to bootstrap EPEL
 [alma-extras]
@@ -14,7 +13,6 @@ name=AlmaLinux 10 - Extras
 baseurl=@@SRCURL@@/10.0/extras/x86_64_v2/os/
 gpgcheck=1
 gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-AlmaLinux-10
-enabled=0
 
 # devel is required for libyajl.so.2 in yajl, Alma devs notified
 [alma-devel]
@@ -22,7 +20,6 @@ name=Almalinux 10 - Devel
 #mirrorlist=https://mirrors.almalinux.org/mirrorlist/10.0/devel?arch=@@RPMARCH@@
 baseurl=@@SRCURL@@/10.0/devel/@@RPMARCH@@/os/
 gpgcheck=1
-enabled=0
 
 [alma-appstream]
 name=AlmaLinux 10 - AppStream
@@ -32,4 +29,3 @@ gpgcheck=1
 gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-AlmaLinux-10
 metadata_expire=86400
 enabled_metadata=1
-enabled=0
