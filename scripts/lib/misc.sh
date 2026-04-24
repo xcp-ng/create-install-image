@@ -103,7 +103,13 @@ trap 'exitcleanup' EXIT INT
 # getting reused between runs, and confusing yum about which rpm
 # versions should be available.  Yeah that sucks hard.
 # See https://unix.stackexchange.com/questions/92257/
-export TMPDIR=$(mktemp -d "$PWD/tmpdir-XXXXXX")
+# Use realpath -m to canonicalize $PWD before passing it to mktemp:
+# avoids broken file:// URIs when the container working directory is /
+# (Docker's default without WORKDIR), which caused mktemp to produce
+# //tmpdir-XXXXXX and yum to build a file:////tmpdir-... URI that
+# Python 2's urllib cannot open.
+# See: https://xcp-ng.org/forum/topic/12078
+export TMPDIR=$(mktemp -d "$(realpath -m "$PWD")/xcpng-build-XXXXXX")
 CLEANUP_DIRS+=("$TMPDIR")
 
 
