@@ -259,7 +259,7 @@ UTAG=ydi1
 
 sudo ./scripts/create-installimg.sh \
     --srcurl file:///external/mirrors/xcpng/8.3 \
-    --srcurl:$UTAG https://koji.xcp-ng.org/repos/user/8/8.3/$UTAG/
+    -D "$UTAG\!https://koji.xcp-ng.org/repos/user/8/8.3/$UTAG/" \
     --output install-8.3-$UTAG.img \
     8.3:incoming:ydi1
 
