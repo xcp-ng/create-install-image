@@ -15,7 +15,7 @@ Options:
     --srcurl <URL>            get RPMs from repo at <URL>
     --srcurl:<OVERLAY> <URL>  get RPMs for specified <OVERLAY> from <URL>
                               default: the global <URL> controled by --srcurl
-    -D|--define-repo <NICK>!<URL>
+    -D|--define-repo <NICK>=<URL>
                               add yum repo with name <NICK> and base URL <URL>
     --output|-o <OUTPUT.IMG>  choose a different output name
     --force-overwrite         don't abort if output file already exists
@@ -52,12 +52,12 @@ while [ $# -ge 1 ]; do
         -D|--define-repo)
             [ $# -ge 2 ] || die_usage "$1 needs an argument"
             case "$2" in
-                *!*)
-                    nick="${2%!*}"
-                    url="${2#*!}"
+                *=*)
+                    nick="${2%=*}"
+                    url="${2#*=}"
                     ;;
                 *)
-                    die "$1 argument must have 2 parts separated by a '!'"
+                    die "$1 argument must have 2 parts separated by a '='"
                     ;;
             esac
             CUSTOM_REPOS["$nick"]="$url"

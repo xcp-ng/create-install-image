@@ -20,7 +20,7 @@ Options:
                               default: https://updates.xcp-ng.org/<MAJOR>/<DIST>
     --srcurl:<OVERLAY> <URL>  get RPMs for specified <OVERLAY> from <URL>
                               default: the global <URL> controled by --srcurl
-    -D|--define-repo <NICK>!<URL>
+    -D|--define-repo <NICK>=<URL>
                               add yum repo with name <NICK> and base URL <URL>
     --extra-packages "<PACKAGE> [<PACKAGE> ...]"
                               include packages and their dependencies in repo
@@ -84,11 +84,11 @@ while [ $# -ge 1 ]; do
             [ $# -ge 2 ] || die_usage "$1 needs an argument"
             case "$2" in
                 *!*)
-                    nick="${2%!*}"
-                    url="${2#*!}"
+                    nick="${2%=*}"
+                    url="${2#*=}"
                     ;;
                 *)
-                    die "$1 argument must have 2 parts separated by a '!'"
+                    die "$1 argument must have 2 parts separated by a '='"
                     ;;
             esac
             CUSTOM_REPOS["$nick"]="$url"
