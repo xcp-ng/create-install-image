@@ -259,16 +259,16 @@ UTAG=ydi1
 
 sudo ./scripts/create-installimg.sh \
     --srcurl file:///external/mirrors/xcpng/8.3 \
-    -D "$UTAG\!https://koji.xcp-ng.org/repos/user/8/8.3/$UTAG/" \
+    -D "$UTAG=https://koji.xcp-ng.org/repos/user/8/8.3/$UTAG/" \
     --output install-8.3-$UTAG.img \
-    8.3:incoming:ydi1
+    8.3:incoming
 
 ./scripts/create-iso.sh \
     --srcurl file:///external/mirrors/xcpng/8.3 \
-    --srcurl:linstor file:///external/mirrors/xcpng-rvt/8.3 \
+    -D "$UTAG=https://koji.xcp-ng.org/repos/user/8/8.3/$UTAG/" \
     --output xcp-ng-8.3-$UTAG.iso \
     -V "XCP-NG_830_TEST" \
-    8.3:incoming:ydi1 install-8.3-$UTAG.img
+    8.3:incoming install-8.3-$UTAG.img
 ```
 
 
