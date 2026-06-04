@@ -83,7 +83,7 @@ while [ $# -ge 1 ]; do
         -D|--define-repo)
             [ $# -ge 2 ] || die_usage "$1 needs an argument"
             case "$2" in
-                *!*)
+                *=*)
                     nick="${2%=*}"
                     url="${2#*=}"
                     ;;
