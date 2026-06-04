@@ -248,6 +248,29 @@ sudo ./scripts/create-installimg.sh \
     8.3:updates:linstor install-8.3.img
 ```
 
+### 8.3 user repo
+
+User-repository tags in Koji inherit from v8.3-incoming, so this has
+to be used as a base to get a conistent image.
+
+```
+UTAG=ydi1
+./scripts/mirror-repos.sh 8.3 /external/mirrors/xcpng
+
+sudo ./scripts/create-installimg.sh \
+    --srcurl file:///external/mirrors/xcpng/8.3 \
+    --srcurl:$UTAG https://koji.xcp-ng.org/repos/user/8/8.3/$UTAG/
+    --output install-8.3-$UTAG.img \
+    8.3:incoming:ydi1
+
+./scripts/create-iso.sh \
+    --srcurl file:///external/mirrors/xcpng/8.3 \
+    --srcurl:linstor file:///external/mirrors/xcpng-rvt/8.3 \
+    --output xcp-ng-8.3-$UTAG.iso \
+    -V "XCP-NG_830_TEST" \
+    8.3:incoming:ydi1 install-8.3-$UTAG.img
+```
+
 
 ### tip of 8.2 (8.2 + updates)
 
