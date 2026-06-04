@@ -21,8 +21,10 @@ XCP-ng versions.
 They require to install some additional packages first:
 
 ```
-sudo yum install -y genisoimage syslinux grub-tools createrepo_c libfaketime
-sudo yum install -y --enablerepo=epel gnupg1
+[user]$ xcp-ng-dev container shell 8.3 -d . -d ~/mirrors/
+[builder ~]$ sudo yum install -y genisoimage syslinux grub-tools createrepo_c libfaketime lftp
+[builder ~]$ sudo yum install -y --enablerepo=epel gnupg1
+[builder ~]$ cd /external/create-install-image/
 ```
 
 ## Overview of the generation process
@@ -65,15 +67,15 @@ Repositories to mirror can be specified in 2 ways:
   https://updates.xcp-ng.org/ will be mirrored under a subdirectory of
   the target directory named after the version.  Eg. this will
   synchronize the official XCP-ng distribution site to
-  `~/mirrors/xcpng/8.3/`:
+  `/external/mirrors/xcpng/8.3/`:
   ```
-  ./scripts/mirror-repos.sh 8.3 ~/mirrors/xcpng/
+  ./scripts/mirror-repos.sh 8.3 /external/mirrors/xcpng/
   ```
 * a URL to a browsable directory: the whole tree behind this directory
   will be mirrored under a subdirectory of the target directory named
   after the version.  Eg. the above is equivalent to:
   ```
-  ./scripts/mirror-repos.sh https://updates.xcp-ng.org/8/8.3 ~/mirrors/xcpng/
+  ./scripts/mirror-repos.sh https://updates.xcp-ng.org/8/8.3 /external/mirrors/xcpng/
   ```
 
 > [!NOTE]
@@ -206,15 +208,15 @@ the layer search path (one is provided in `base`).
 ### 8.3 updates and testing
 
 ```
-./scripts/mirror-repos.sh 8.3 ~/mirrors/xcpng
+./scripts/mirror-repos.sh 8.3 /external/mirrors/xcpng
 
 sudo ./scripts/create-installimg.sh \
-    --srcurl file://$HOME/mirrors/xcpng/8.3 \
+    --srcurl file:///external/mirrors/xcpng/8.3 \
     --output install-8.3.testing.img \
     8.3:testing
 
 ./scripts/create-iso.sh \
-    --srcurl file://$HOME/mirrors/xcpng/8.3 \
+    --srcurl file:///external/mirrors/xcpng/8.3 \
     --output xcp-ng-8.3.testing.iso \
     -V "XCP-NG_830_TEST" \
     8.3:testing install-8.3.testing.img
@@ -229,17 +231,17 @@ packages in 8.3, the last version from 8.2:
 ```
 LINSTOR82=1.29.0-1.el7_9
 
-./scripts/mirror-repos.sh 8.3 ~/mirrors/xcpng
-./scripts/mirror-repos.sh https://repo.vates.tech/xcp-ng/8/8.3 ~/mirrors/xcpng-rvt/8.3
+./scripts/mirror-repos.sh 8.3 /external/mirrors/xcpng
+./scripts/mirror-repos.sh https://repo.vates.tech/xcp-ng/8/8.3 /external/mirrors/xcpng-rvt/8.3
 
 sudo ./scripts/create-installimg.sh \
-    --srcurl file://$HOME/mirrors/xcpng/8.3 \
+    --srcurl file:///external/mirrors/xcpng/8.3 \
     --output install-8.3.img \
     8.3:updates
 
 ./scripts/create-iso.sh \
-    --srcurl file://$HOME/mirrors/xcpng/8.3 \
-    --srcurl:linstor file://$HOME/mirrors/xcpng-rvt/8.3 \
+    --srcurl file:///external/mirrors/xcpng/8.3 \
+    --srcurl:linstor file:///external/mirrors/xcpng-rvt/8.3 \
     --output xcp-ng-8.3.linstor.iso \
     --extra-packages "xcp-ng-release-linstor xcp-ng-linstor linstor-satellite-$LINSTOR82 linstor-controller-$LINSTOR82 linstor-common-$LINSTOR82" \
     -V "XCP-NG_830_TEST" \
@@ -250,15 +252,15 @@ sudo ./scripts/create-installimg.sh \
 ### tip of 8.2 (8.2 + updates)
 
 ```
-./scripts/mirror-repos.sh 8.2 ~/mirrors/xcpng
+./scripts/mirror-repos.sh 8.2 /external/mirrors/xcpng
 
 sudo ./scripts/create-installimg.sh \
-    --srcurl file://$HOME/mirrors/xcpng/8.2 \
+    --srcurl file:///external/mirrors/xcpng/8.2 \
     --output install-8.2.updates.img \
     8.2:updates
 
 ./scripts/create-iso.sh \
-    --srcurl file://$HOME/mirrors/xcpng/8.2 \
+    --srcurl file:///external/mirrors/xcpng/8.2 \
     --output xcp-ng-8.2.updates.iso \
     -V "XCP-NG_82_TEST" \
     8.2:updates install-8.2.updates.img
