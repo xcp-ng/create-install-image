@@ -42,53 +42,6 @@ The sequence of steps is:
 
 All script have a `--help` documenting all their options.
 
-### `./scripts/create-iso.sh`
-
-Creates `.iso` from:
-- `install.img` (see below)
-- yum repository for the product (or a local mirror) for boot files and
-  local repository
-- additional files from `./iso/$RELEASE/`
-- optional signing script
-
-When generating a full image (as opposed to a netinstall one), the yum
-repository included in the ISO can optionally be signed.  Since the
-signing key is precious and secret material, it is advised not to be
-stored on a development machine.  To perform the signing operation,
-you have to provide an executable script which will take as parameter
-the path to the directory with which contents the ISO will be built.
-
-The script must:
-- sign the `repomd.xml` yum repository metadata index using a gpg1
-  detached ascii/armor signature
-- export the public key usable for signature verification to a
-  `RPM-GPG-KEY-*` file at the root of the ISO directory
-- set the `[keys]key1` field in `.treeinfo` at the root of the ISO
-  directory to name the file created at previous step containing the
-  public key
-
-> [!NOTE]
->
-> If one of the packages requested for shipping as part of the repo is
-> not available, a `No package <package-name> available.` message will
-> be next-to-visible in the non-verbose output.  Sadly `yumdownloader`
-> does not seem to provide a behaviour where it would fail if it
-> cannot do what we request from it.
-
-> [!NOTE]
->
-> The `scripts/sample-sign-script.sh` example script is only suitable
-> for playing with a test key.  A safer solution would for example
-> request signature from a signature server, prompting you for an OTP
-> token to make sure you're entitled to use the service.
-
-### `./scripts/create-installimg.sh`
-
-Creates `install-$RELEASE.img` for input to `create-iso`, from:
-- yum repository for the product (or a local mirror)
-- a `packages.lst` file listing RPMs to be installed
-- additional files from `./installimg/$RELEASE/`
-
 ### `./scripts/mirror-repos.sh`
 
 Note this script requires the `lftp` tool to do its job:
@@ -150,6 +103,53 @@ Repositories to mirror can be specified in 2 ways:
 > ```
 > set dns:order "inet inet6"
 > ```
+
+### `./scripts/create-installimg.sh`
+
+Creates `install-$RELEASE.img` for input to `create-iso`, from:
+- yum repository for the product (or a local mirror)
+- a `packages.lst` file listing RPMs to be installed
+- additional files from `./installimg/$RELEASE/`
+
+### `./scripts/create-iso.sh`
+
+Creates `.iso` from:
+- `install.img` (see below)
+- yum repository for the product (or a local mirror) for boot files and
+  local repository
+- additional files from `./iso/$RELEASE/`
+- optional signing script
+
+When generating a full image (as opposed to a netinstall one), the yum
+repository included in the ISO can optionally be signed.  Since the
+signing key is precious and secret material, it is advised not to be
+stored on a development machine.  To perform the signing operation,
+you have to provide an executable script which will take as parameter
+the path to the directory with which contents the ISO will be built.
+
+The script must:
+- sign the `repomd.xml` yum repository metadata index using a gpg1
+  detached ascii/armor signature
+- export the public key usable for signature verification to a
+  `RPM-GPG-KEY-*` file at the root of the ISO directory
+- set the `[keys]key1` field in `.treeinfo` at the root of the ISO
+  directory to name the file created at previous step containing the
+  public key
+
+> [!NOTE]
+>
+> If one of the packages requested for shipping as part of the repo is
+> not available, a `No package <package-name> available.` message will
+> be next-to-visible in the non-verbose output.  Sadly `yumdownloader`
+> does not seem to provide a behaviour where it would fail if it
+> cannot do what we request from it.
+
+> [!NOTE]
+>
+> The `scripts/sample-sign-script.sh` example script is only suitable
+> for playing with a test key.  A safer solution would for example
+> request signature from a signature server, prompting you for an OTP
+> token to make sure you're entitled to use the service.
 
 ## Configuration layers and package repositories
 
@@ -291,13 +291,13 @@ reason still to be determined)
 * boot media selection:
 
   * CD/DVD:
-  
+
   ```
    -cdrom xcp-ng-install.iso
   ```
-  
+
   * USB storage:
-  
+
   ```
    -drive if=none,id=stick,format=raw,file=xcp-ng-install.iso \
    -device nec-usb-xhci,id=xhci \
