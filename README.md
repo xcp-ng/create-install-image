@@ -251,24 +251,26 @@ sudo ./scripts/create-installimg.sh \
 ### 8.3 user repo
 
 User-repository tags in Koji inherit from v8.3-incoming, so this has
-to be used as a base to get a conistent image.
+to be used as a base to get a consistent image.
 
 ```
 UTAG=ydi1
+IMGSUFFIX=$UTAG
 ./scripts/mirror-repos.sh 8.3 /external/mirrors/xcpng
+./scripts/mirror-repos.sh https://koji.xcp-ng.org/repos/user/8/8.3/$UTAG/ /external/mirrors/xcpng-$UTAG
 
 sudo ./scripts/create-installimg.sh \
     --srcurl file:///external/mirrors/xcpng/8.3 \
-    -D "$UTAG=https://koji.xcp-ng.org/repos/user/8/8.3/$UTAG/" \
-    --output install-8.3-$UTAG.img \
+    -D "$UTAG=file:///external/mirrors/xcpng-$UTAG/" \
+    --output install-8.3-$IMGSUFFIX.img \
     8.3:incoming
 
 ./scripts/create-iso.sh \
     --srcurl file:///external/mirrors/xcpng/8.3 \
-    -D "$UTAG=https://koji.xcp-ng.org/repos/user/8/8.3/$UTAG/" \
-    --output xcp-ng-8.3-$UTAG.iso \
+    -D "$UTAG=file:///external/mirrors/xcpng-$UTAG/" \
+    --output xcp-ng-8.3-$IMGSUFFIX.iso \
     -V "XCP-NG_830_TEST" \
-    8.3:incoming install-8.3-$UTAG.img
+    8.3:incoming install-8.3-$IMGSUFFIX.img
 ```
 
 
