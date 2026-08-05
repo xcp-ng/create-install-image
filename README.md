@@ -227,10 +227,10 @@ repository.  It needs to include, in addition to the latest linstor
 packages in 8.3, the last version from 8.2:
 
 ```
-LINSTOR82=1.29.0-1.el7_9
-
 ./scripts/mirror-repos.sh 8.3 ~/mirrors/xcpng
 ./scripts/mirror-repos.sh https://repo.vates.tech/xcp-ng/8/8.3 ~/mirrors/xcpng-rvt/8.3
+
+LINSTOR_MULTIVER_PKGS=$(cd /external/mirrors/xcpng-rvt/8.3/linstor/x86_64/Packages/ && for rpm in *linstor*; do basename $rpm .rpm; done)
 
 sudo ./scripts/create-installimg.sh \
     --srcurl file://$HOME/mirrors/xcpng/8.3 \
@@ -241,7 +241,7 @@ sudo ./scripts/create-installimg.sh \
     --srcurl file://$HOME/mirrors/xcpng/8.3 \
     --srcurl:linstor file://$HOME/mirrors/xcpng-rvt/8.3 \
     --output xcp-ng-8.3.linstor.iso \
-    --extra-packages "xcp-ng-release-linstor xcp-ng-linstor linstor-satellite-$LINSTOR82 linstor-controller-$LINSTOR82 linstor-common-$LINSTOR82" \
+    --extra-packages "xcp-ng-release-linstor $LINSTOR_MULTIVER_PKGS" \
     -V "XCP-NG_830_TEST" \
     8.3:updates:linstor install-8.3.img
 ```
