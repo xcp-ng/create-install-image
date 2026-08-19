@@ -5,6 +5,7 @@ set -e
 ROOTDIR=$(pwd)
 VERSION=8.3
 YMD=$(date +%Y%m%d)
+RPMARCH=x86_64
 
 . "$ROOTDIR/scripts/lib/misc.sh"
 
@@ -155,7 +156,7 @@ sudo ./scripts/create-installimg.sh \
     $VERSION:$TARGET
 
 # With linstor support
-LINSTOR_MULTIVER_PKGS=$(cd "$REPO_VATES_TECH/linstor/x86_64/Packages/" && for rpm in *linstor*.rpm; do basename $rpm .rpm; done)
+LINSTOR_MULTIVER_PKGS=$(cd "$REPO_VATES_TECH/linstor/$RPMARCH/Packages/" && for rpm in *linstor*.rpm; do basename $rpm .rpm; done)
 # Remove older linstor packages from LINSTOR_MULTIVER_PKGS
 # They're packages that were never supported in 8.3 and older than what 8.2 has
 LINSTOR_MULTIVER_PKGS=$(echo "$LINSTOR_MULTIVER_PKGS" | grep -Fvw \

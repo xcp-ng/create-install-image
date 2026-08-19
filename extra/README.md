@@ -1,4 +1,4 @@
-The build-8.3.sh script in this directory can be used as shortcut to building custom XCP-ng 8.3 ISO images.
+The build-8.3.sh script in this directory can be used as a shortcut to building custom XCP-ng 8.3 ISO images.
 
 Note that it is sensitive to the current working directory, so call it from the root of the repository.
 
