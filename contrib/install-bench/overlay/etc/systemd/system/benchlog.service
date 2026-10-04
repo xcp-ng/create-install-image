@@ -1,0 +1,6 @@
+[Unit]
+Description=Stream installer task milestones to serial for benchmarking
+[Service]
+ExecStart=/bin/sh -c 'until [ -e /tmp/install-log ]; do sleep 1; done; tail -F -n +1 /tmp/install-log | grep --line-buffered -E "TASK: Evaluating|DISPATCH: NEW|Traceback|Error|DNF exited" | cut -c1-160 > /dev/hvc0 2>&1'
+[Install]
+WantedBy=multi-user.target
