@@ -11,6 +11,9 @@ kernel
 #kernel-alt
 ## hardware support
 linux-firmware
+## unpacking host-installer's prebuilt rootfs image (DEMONSTRATOR, create-iso.sh --rootfs-image)
+zstd
+
 ## ease of debugging
 netcat
 pciutils
