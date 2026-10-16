@@ -167,16 +167,29 @@ setup_yum_repos() {
                 > "$YUMREPOSD/$reponame.repo"
     done
 
-    # custom repos from cmdline
-    CUSTOMREPO_TEMPLATE=$(find_config CUSTOMREPO.tmpl)
+    # Custom repos from command line
     for repoid in "${!CUSTOM_REPOS[@]}"; do
         repourl="${CUSTOM_REPOS[$repoid]}"
-        cat "$CUSTOMREPO_TEMPLATE" |
-            sed \
-                -e "s,@@REPOID@@,$repoid," \
-                -e "s,@@REPOURL@@,$repourl," \
-                -e "s,@@RPMARCH@@,$RPMARCH," \
-                > "$YUMREPOSD/$repoid.repo"
+
+        case "${repoid}" in
+            nephora)
+                CUSTOMREPO_TEMPLATE="$(
+                    find_config CUSTOMREPO-nephora.tmpl
+                )"
+                ;;
+            *)
+                CUSTOMREPO_TEMPLATE="$(
+                    find_config CUSTOMREPO.tmpl
+                )"
+                ;;
+        esac
+
+        sed \
+            -e "s,@@REPOID@@,${repoid}," \
+            -e "s,@@REPOURL@@,${repourl}," \
+            -e "s,@@RPMARCH@@,${RPMARCH}," \
+            "${CUSTOMREPO_TEMPLATE}" \
+            > "${YUMREPOSD}/${repoid}.repo"
     done
 
     # availability of yumdownloader does not imply that of yum
