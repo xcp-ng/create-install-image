@@ -196,8 +196,8 @@ tar -C "$topdir/templates/iso/$DIST" -cf - . | tar -C "$ISODIR/" -xf - ${VERBOSE
 cp ${VERBOSE} -a "$INSTALLIMG" $ISODIR/install.img
 
 # kernel from rpm
-get_rpms "$SCRATCHDIR" kernel
-kpkg=kernel
+kpkg=kernel-xcpng
+get_rpms "$SCRATCHDIR" $kpkg
 kdir=./boot
 rpm2cpio $SCRATCHDIR/$kpkg-*.rpm | (cd $ISODIR && cpio ${VERBOSE} -idm "$kdir/vmlinuz*")
 rm ${VERBOSE} $ISODIR/boot/vmlinuz-*-xen
