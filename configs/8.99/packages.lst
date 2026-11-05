@@ -7,7 +7,7 @@ dhcp-client
 # installer preinit needs xl
 xen-dom0-tools
 ## kernels
-kernel
+kernel-xcpng
 #kernel-alt
 ## hardware support
 linux-firmware
