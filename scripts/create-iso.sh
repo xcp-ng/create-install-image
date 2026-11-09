@@ -30,6 +30,9 @@ Options:
                               rpm: take prebuilt xenserver/grubx64.efi from rpm
                               mkimage: call mkimage to generate an EFI binary
     --netinstall              do not include repository in ISO
+    --rootfs-image            (DEMONSTRATOR) also include rootfs.tar.zst, the
+                              repository's package set prebuilt for host-installer
+                              to unpack instead of running dnf (needs root)
     --sign-script <SCRIPT>    sign repomd using <SCRIPT>
     --force-overwrite         don't abort if output file already exists
     --verbose                 be talkative
@@ -40,6 +43,7 @@ VERBOSE=
 OUTISO=
 FORCE_OVERWRITE=0
 DOREPO=1
+ROOTFS_IMAGE=0
 SIGNSCRIPT=
 EXTRA_PACKAGES=
 PKGTOOL=yum
@@ -75,6 +79,9 @@ while [ $# -ge 1 ]; do
             ;;
         --netinstall)
             DOREPO=0
+            ;;
+        --rootfs-image)
+            ROOTFS_IMAGE=1
             ;;
         --srcurl)
             [ $# -ge 2 ] || die_usage "$1 needs an argument"
@@ -145,6 +152,9 @@ fi
 
 if [ $DOREPO = 0 -a -n "$SIGNSCRIPT" ]; then
     die_usage "signing script is useless on netinstall media"
+fi
+if [ $DOREPO = 0 -a $ROOTFS_IMAGE = 1 ]; then
+    die_usage "--rootfs-image needs the repository, not compatible with --netinstall"
 fi
 
 parse_config_search_path "$1"
@@ -280,6 +290,15 @@ if [ $DOREPO = 1 ]; then
     get_rpms --depends "$ISODIR/Packages" xcp-ng-deps ${ALTKERNEL} ${EXTRA_PACKAGES}
 
     createrepo_c ${VERBOSE} --compatibility "$ISODIR"
+    if [ $ROOTFS_IMAGE = 1 ]; then
+        # FIXME: the image is not covered by the repository signature below,
+        # so installing from it bypasses repo_gpgcheck.
+        ROOTFS_PKGLIST=$(find_config rootfs-image-packages.lst)
+        [ -n "$ROOTFS_PKGLIST" ] || die "no rootfs-image-packages.lst in config '$DIST'"
+        "$mydir/create-rootfs-image.sh" "$ROOTFS_PKGLIST" \
+            "$INSTALLIMG" "$ISODIR" "$SCRATCHDIR/rootfs.tar.zst"
+        mv ${VERBOSE} "$SCRATCHDIR/rootfs.tar.zst" "$ISODIR/rootfs.tar.zst"
+    fi
     if [ -n "$SIGNSCRIPT" ]; then
         "$SIGNSCRIPT" "$ISODIR"
         # Check that the digest is strong enough. Value 8 means SHA256.

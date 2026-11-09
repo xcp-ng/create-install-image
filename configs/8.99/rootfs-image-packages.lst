@@ -1,0 +1,10 @@
+# DEMONSTRATOR: packages installed in the prebuilt rootfs image (create-iso.sh
+# --rootfs-image). Must match what host-installer installs from the main
+# repository without an image.
+xcp-ng-deps
+# Only pulled in as weak dependencies by EL10; drop once xcp-ng-deps requires
+# them (see the companion xcp-ng-deps PR) - host-installer carries the same list.
+e2fsprogs xfsprogs dosfstools diffutils jq pigz polkit tpm2-tools unbound-anchor
+amd-ucode-firmware realtek-firmware amd-gpu-firmware intel-gpu-firmware nvidia-gpu-firmware
+atheros-firmware brcmfmac-firmware mt7xxx-firmware nxpwireless-firmware tiwilink-firmware
+intel-audio-firmware cirrus-audio-firmware

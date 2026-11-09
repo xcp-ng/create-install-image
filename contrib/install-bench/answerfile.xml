@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<installation srtype="ext">
+  <primary-disk>vda</primary-disk>
+  <keymap>us</keymap>
+  <root-password>xcpngbench</root-password>
+  <source type="local"/>
+  <admin-interface hwaddr="52:54:00:12:34:56" proto="dhcp"/>
+  <timezone>Europe/Paris</timezone>
+</installation>
